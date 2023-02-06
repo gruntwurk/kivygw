@@ -1,0 +1,8 @@
+pytest>=5.4.3
+black
+flake8
+isort
+pytest
+tox
+wheel
+
