@@ -1,6 +1,39 @@
 __all__ = [
     "Singleton",
+    "package_name",
 ]
+
+
+def package_name(module_name: str) -> str:
+    """
+    Determines the package name of the given module name. The module name is
+    the name of the file in which a class or function is defined. The package
+    name is the parent folder.
+
+    :param module_name: A module name to examine.
+
+    :return: The package name part of the module name. In this case, we
+    return just the parent subfolder name, not the whole path.
+    """
+    module_parts = module_name.split(".")
+    return module_parts[-2] if len(module_parts) >= 2 else ''
+
+
+def class_from_name(class_name):
+    """
+    Determines the class based on the class name.
+
+    :param class_name: The fully-qualified class name (e.g. src.myapp.member.MemberType; case sensitive)
+    :return: The class type
+    """
+
+    # FIXME Does this work if the src folder is a parent of the app's source root?
+    # TODO Needs a unit test
+    parts = class_name.rsplit(".", maxsplit=1)
+    module_name = parts[0]
+    class_name = parts[1]
+    module = importlib.import_module(module_name)
+    return getattr(module, class_name)
 
 
 class Singleton:
@@ -26,5 +59,3 @@ class Singleton:
 
     def __instancecheck__(self, inst):
         return isinstance(inst, self._cls)
-
-

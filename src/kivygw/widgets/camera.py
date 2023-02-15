@@ -2,16 +2,16 @@ import logging
 
 from kivy.uix.camera import Camera
 
-from gwpycore import GWError, CameraInfo
-from gwpycore.kivy import inform_user
+from ..utils.cameras import CameraInfo
+from ..app_support.dialogs import inform_user
 
-LOG = logging.getLogger("gwpy")
+LOG = logging.getLogger("kivygw")
 
 
 class GWCamera(Camera):
     '''
     Subclass of the Kivy Camera widget that automatically gets configured
-    according to the CameraInfo() singleton (in gwpycore).
+    according to the CameraInfo() singleton.
     '''
     def __init__(self, **kwargs):
         assert not self.play
@@ -32,7 +32,7 @@ class GWCamera(Camera):
                     super().__init__(**kwargs)
                     inform_user(f"Camera #{orig_port} was not found. Using camera #0.")
                 except AttributeError as e:
-                    raise GWError("Unable to initialize any camera.") from e
+                    raise SystemError("Unable to initialize any camera.") from e
 
     def close(self):
         self.play = False

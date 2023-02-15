@@ -83,6 +83,7 @@ def log_uncaught(exception: Optional[Exception] = None, log: logging.Logger = No
         log.exception(exception)
     return exitcode
 
+
 # ############################################################################
 #                                                            CUSTOM EXCEPTIONS
 # ############################################################################
@@ -97,7 +98,6 @@ class ConfigError(Exception):
 
     def __init__(self, *args) -> None:
         super().__init__(*args)
-
 
 
 class ValueInterpretationWarning(Warning):
@@ -128,6 +128,7 @@ class ValueInterpretationWarning(Warning):
         if possible_values:
             msg += f" Possible values are: {possible_values}"
         super(ValueInterpretationWarning, self).__init__(msg, *args, loglevel=loglevel)
+
 
 class ConfigSettingWarning(ValueInterpretationWarning):
     """

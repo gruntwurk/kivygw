@@ -11,7 +11,8 @@ from kivy.uix.screenmanager import Screen, ScreenManager, ScreenManagerException
 from kivy.lang import Builder
 from kivy.app import App
 
-from .utils import snake_case, package_name, GWFileNotFoundError
+from ..utils.strings import snake_case
+from ..utils.typing_utils import package_name
 
 LOG = logging.getLogger("gwpy")
 
@@ -57,7 +58,7 @@ def load_kv(class_ref, kv_file_required=True, alternate_path="assets") -> str:
         Builder.load_file(str(kv_file))
         LOG.debug(f"KV file loaded: {kv_file}")
     elif kv_file_required:
-        raise GWFileNotFoundError(f"Cannot locate KV file: {kv_file}")
+        raise FileNotFoundError(f"Cannot locate KV file: {kv_file}")
     return screen_name
 
 
@@ -88,5 +89,3 @@ def switch_to_screen(screen_name='') -> Screen:
     except ScreenManagerException:
         LOG.error(f"No such screen as {screen_name}. Choices are: {manager.screen_names}.")
     return manager.current_screen
-
-

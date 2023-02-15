@@ -1,20 +1,12 @@
 from kivy.core.window import Window
 
-from ...core.exceptions import GWConfigSettingWarning
+from ..utils.exceptions import ConfigSettingWarning
 
 
 __all__ = [
-    "widget_by_id",
     "get_app_position",
     "set_app_position",
 ]
-
-
-def widget_by_id(parent, value) -> object:
-    for widget in parent.walk():
-        if widget.id == value:
-            return widget
-    return None
 
 
 def get_app_position() -> dict:
@@ -40,7 +32,7 @@ def set_app_position(source: dict):
     then the corresponding aspect of the window will not change. (With
     height and width, it's both or nothing.)
 
-    :raises GWConfigSettingWarning: If any value is not a valid integer.
+    :raises ConfigSettingWarning: If any value is not a valid integer.
     """
     try:
         if source['app_left']:
@@ -50,7 +42,7 @@ def set_app_position(source: dict):
         if source['app_width'] and source['app_height']:
             Window.size = (int(source['app_width']), int(source['app_height']))
     except ValueError as e:
-        raise GWConfigSettingWarning(
+        raise ConfigSettingWarning(
             key="(left, top, width, height)",
             attempted_value=f"({source['app_left']},{source['app_top']},{source['app_width']},{source['app_height']})",
             context="an attempt to set the position/size of the main window",

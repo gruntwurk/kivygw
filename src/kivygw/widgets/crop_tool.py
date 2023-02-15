@@ -15,7 +15,7 @@ from kivy.graphics.instructions import Canvas
 from kivy.graphics.vertex_instructions import Rectangle
 from kivy.graphics.texture import Texture
 
-from gwpycore.core.numeric import round_base
+from ..utils.numeric import round_base
 
 __all__ = [
     "CropTool",

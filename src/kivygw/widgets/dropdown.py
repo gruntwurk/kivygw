@@ -4,8 +4,8 @@ from kivy.uix.spinner import Spinner, SpinnerOption
 # from kivy.uix.dropdown import DropDown
 from kivy.properties import NumericProperty, StringProperty
 
-from utils.colors import float_tuple, color_outline
-from utils.typing_utils import class_from_name
+from ..utils.colors import float_tuple, color_outline
+from ..utils.typing_utils import class_from_name
 
 
 LOG = logging.getLogger("gwpy")

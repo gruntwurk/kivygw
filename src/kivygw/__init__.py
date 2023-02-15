@@ -4,14 +4,18 @@
 # "from kivygw import X" where X is the ultimate class or function name
 
 # flake8: noqa
+__version__ = "0.0.1"
 
+from .utils.cameras import *
 from .utils.colors import *
 from .utils.exceptions import *
 from .utils.numeric import *
 from .utils.strings import *
+from .utils.typing_utils import *
+from .utils.widget_tools import *
 from .app_support.dialogs import *
 from .app_support.screens import *
-from .app_support.main_window import *
+from .app_support.main_window_config import *
 from .widgets.background import *
 from .widgets.camera import *
 from .widgets.dropdown import *

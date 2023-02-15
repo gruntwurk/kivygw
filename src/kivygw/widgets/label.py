@@ -2,8 +2,8 @@ import logging
 
 from kivy.uix.label import Label
 from kivy.properties import NumericProperty
-from gwpycore.kivy.widgets.background import BackgroundColor
-from gwpycore.core.colors import NamedColor
+from .background import BackgroundColor
+from ..utils.colors import NamedColor
 
 LOG = logging.getLogger("gwpy")
 

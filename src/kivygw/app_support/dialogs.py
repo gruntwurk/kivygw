@@ -25,7 +25,7 @@ from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.popup import Popup
 
-from ..utils import Singleton
+from ..utils.typing_utils import Singleton
 
 LOG = logging.getLogger("gwpy")
 

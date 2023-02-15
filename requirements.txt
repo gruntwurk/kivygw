@@ -1,2 +1,4 @@
 # Python itself must be >= 3.8
 kivy
+pillow
+opencv-python
