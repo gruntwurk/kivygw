@@ -7,7 +7,7 @@ from kivy.core.window import Window
 # from ...core.keystrokes import parse_keystroke_expression
 
 
-LOG = logging.getLogger("gwpy")
+LOG = logging.getLogger("kivygw")
 
 
 __ALL__ = [
@@ -145,14 +145,16 @@ class MultiKeystrokeListener(Widget):
         # self._keyboard = None
 
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
-        # This handler is called spuriously. For example, on the way to a
-        # ctrl+alt+f1, it gets called for each of the keydowns:
-        #     ctrl, ctrl+shift, ctrl+shift+f1.
-        # Also, if there is a pause in between, then the keyboard may auto
-        # repeat, as in:
-        #     ctrl, ctrl, ctrl, ctrl, ctrl, ctrl, ctrl+shift, ctrl+shift+f1
-        # So, we just want to remember the last call, then only act on it
-        # once we start to receive key_up calls.
+        """
+        This handler is called spuriously. For example, on the way to a
+        ctrl+alt+f1, it gets called for each of the keydowns:
+            ctrl, ctrl+shift, ctrl+shift+f1.
+        Also, if there is a pause in between, then the keyboard may auto
+        repeat, as in:
+            ctrl, ctrl, ctrl, ctrl, ctrl, ctrl, ctrl+shift, ctrl+shift+f1
+        So, we just want to remember the last call, then only act on it
+        once we start to receive key_up calls.
+        """
         self.latest_down = (keycode, modifiers)
         # print('--- DOWN ---')
         # print('keycode[0]:', keycode[0])
@@ -160,22 +162,24 @@ class MultiKeystrokeListener(Widget):
         # print('text:', text)
         # print('modifiers:', modifiers)
 
-        # Return True to accept the key. Otherwise, it will be used by
-        # the system.
+        # Return True to accept the key. Otherwise, it will be used by the system.
         return True
 
     def _on_keyboard_up(self, keyboard, keycode):
         # Now we can act on the last keydown we saw.
-        if self.latest_down:
-            keycode, modifiers = self.latest_down
-            self.do_key_press(keycode, modifiers)
-            # Be sure to only act once, e.g. in the case of ctrl+shift+f1,
-            # we'll get 3 calls to key_up (in random order)
-            self.latest_down = None
+        if not self.latest_down:
+            # This keypress was already handled
+            return True
 
-        # Return True to accept the key. Otherwise, it will be used by
-        # the system.
-        return True
+        keycode, modifiers = self.latest_down
+        self.latest_down = None
+        # Clearing latest_down ensures that we only act once, e.g. in the case
+        # of ctrl+shift+f1, we'll get 3 calls to key_up (in random order).
+
+        # Return whether or not the do_key_press callback recognizes the
+        # keystroke and handles it; otherwise, let the system handle it.
+        return self.do_key_press(keycode, modifiers)
+
 
 
 

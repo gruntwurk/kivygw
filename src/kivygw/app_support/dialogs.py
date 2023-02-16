@@ -25,7 +25,7 @@ from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.popup import Popup
 
-from ..utils.typing_utils import Singleton
+from ..utils.class_utils import Singleton
 
 LOG = logging.getLogger("gwpy")
 
@@ -262,7 +262,7 @@ class FileChooser(GWDialog):
     def set_options(self, use_icon_view=False):   # , allow_freeform=False):
         self._use_icon_view = use_icon_view
         # if allow_freeform:
-            # self._allow_freeform = allow_freeform
+        # self._allow_freeform = allow_freeform
 
     def open(self, starting_path: str):
         self._payload = FileChooserIconView() if self._use_icon_view else FileChooserListView()
@@ -311,7 +311,7 @@ def choose_file(
     dlg = FileChooser()
     dlg.dir_select = dir_select
     dlg.set_user_callbacks(on_ok, on_cancel)
-    dlg.set_options(use_icon_view, allow_freeform)
+    dlg.set_options(use_icon_view)  # , allow_freeform)
     dlg.buttons = {"ok": "Select", "cancel": "Cancel"}
     dlg.title = title
     dlg.filters = filters

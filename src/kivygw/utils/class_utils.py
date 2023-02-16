@@ -1,3 +1,5 @@
+import importlib
+
 __all__ = [
     "Singleton",
     "package_name",

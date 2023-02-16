@@ -2,7 +2,7 @@ import logging
 import cv2
 import sys
 
-from .typing_utils import Singleton
+from .class_utils import Singleton
 
 MAX_PORT_NUMBER = 3
 LOG = logging.getLogger("gwpy")

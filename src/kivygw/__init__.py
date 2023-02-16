@@ -11,7 +11,7 @@ from .utils.colors import *
 from .utils.exceptions import *
 from .utils.numeric import *
 from .utils.strings import *
-from .utils.typing_utils import *
+from .utils.class_utils import *
 from .utils.widget_tools import *
 from .app_support.dialogs import *
 from .app_support.screens import *
@@ -25,6 +25,7 @@ from .widgets.scroll_widget import *
 from .widgets.label import *
 from .widgets.button import *
 from .widgets.hotkey import *
+from .widgets.action import *
 # from .kivy.assets.fonts import *
 # from .kivy.assets.icons import *
 # from .kivy.assets.images import *

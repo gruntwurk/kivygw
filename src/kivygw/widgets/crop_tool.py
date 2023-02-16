@@ -21,7 +21,7 @@ __all__ = [
     "CropTool",
 ]
 
-LOG = logging.getLogger("gwpy")
+LOG = logging.getLogger("kivygw")
 ZOOM_INCREMENT = 0.1  # make the image 10% bigger or smaller
 DEFAULT_IMAGE_WINDOW_HEIGHT = 720
 DEFAULT_IMAGE_WINDOW_WIDTH = 1280

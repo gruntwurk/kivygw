@@ -3,7 +3,7 @@ from kivy.uix.widget import Widget
 from kivy.graphics import Canvas, Color, Rectangle
 from kivy.properties import ColorProperty
 
-LOG = logging.getLogger("gwpy")
+LOG = logging.getLogger("kivygw")
 
 
 __ALL__ = [

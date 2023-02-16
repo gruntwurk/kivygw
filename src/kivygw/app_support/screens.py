@@ -12,7 +12,7 @@ from kivy.lang import Builder
 from kivy.app import App
 
 from ..utils.strings import snake_case
-from ..utils.typing_utils import package_name
+from ..utils.class_utils import package_name
 
 LOG = logging.getLogger("gwpy")
 

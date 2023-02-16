@@ -5,7 +5,7 @@ from kivy.properties import NumericProperty
 from .background import BackgroundColor
 from ..utils.colors import NamedColor
 
-LOG = logging.getLogger("gwpy")
+LOG = logging.getLogger("kivygw")
 
 
 __all__ = [

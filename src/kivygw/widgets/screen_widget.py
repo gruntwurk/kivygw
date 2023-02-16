@@ -7,9 +7,9 @@ from kivy.uix.screenmanager import Screen, ScreenManager, ScreenManagerException
 from kivy.lang import Builder
 
 from ..utils.strings import snake_case
-from ..utils.typing_utils import package_name
+from ..utils.class_utils import package_name
 
-LOG = logging.getLogger("gwpy")
+LOG = logging.getLogger("kivygw")
 
 
 __all__ = [
