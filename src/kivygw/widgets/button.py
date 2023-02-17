@@ -1,6 +1,8 @@
 import logging
 
 from kivy.uix.button import Button
+from kivy.properties import ObjectProperty
+
 from ..utils.exceptions import ConfigError
 from ..widgets.action import CommandAction
 from ..utils.colors import NamedColor
@@ -21,20 +23,16 @@ class GWButton(Button, BackgroundColor):
     is not muddled. The default background color is 20% gray.
     """
 
+    command_action = ObjectProperty(None)
+
     def __init__(self, **kwargs):
         self.background_normal = ''
         self.background_color = NamedColor.GRAY80.float_tuple()
         self._command_action = None
         super().__init__(**kwargs)
 
-    @property
-    def command_action(self):
-        """The command_action property."""
-        return self._command_action
-
-    @command_action.setter
-    def command_action(self, value):
+    def on_command_action(self, instance, value):
         if not isinstance(value, CommandAction):
-            raise ConfigError("command_action value must be an instace of CommandAction")
+            raise ConfigError("command_action value must be an instance of CommandAction")
         value.attach_to(self)
 

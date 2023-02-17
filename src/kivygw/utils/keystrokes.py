@@ -42,7 +42,7 @@ KEYCODES = {
     'numpad0': 256, 'numpad1': 257, 'numpad2': 258, 'numpad3': 259,
     'numpad4': 260, 'numpad5': 261, 'numpad6': 262, 'numpad7': 263,
     'numpad8': 264, 'numpad9': 265, 'numpaddecimal': 266,
-    'numpaddivide': 267, 'numpadmul': 268, 'numpadsubstract': 269,
+    'numpaddivide': 267, 'numpadmul': 268, 'numpadsubtract': 269,
     'numpadadd': 270, 'numpadenter': 271,
 
     # F1-15
@@ -107,7 +107,7 @@ KEYCODE_GENERICS = {
     'numpaddecimal': '.',
     'numpaddivide': '/',
     'numpadmul': '*',
-    'numpadsubstract': '-',
+    'numpadsubtract': '-',
     'numpadadd': '+',
     'numpadenter': 'enter',
 }
@@ -125,7 +125,7 @@ MODIFIERS = {
 }
 
 
-def parse_keystroke_expression(keystroke_expression: Union[List, str], as_generic=False) -> List[int]:
+def parse_keystroke_expression(keystroke_expression: Union[List, str], keycode: int = 0, as_generic=False) -> List[int]:
     """
     Parses a key combination expression, i.e. key identifiers separated by a
     plus-sign (+). Key identifiers are either single characters representing a
@@ -137,7 +137,12 @@ def parse_keystroke_expression(keystroke_expression: Union[List, str], as_generi
     All but the last one must be one of the four modifiers (`shift`, `ctrl`,` alt` or `opt`,
     `meta` or `super`).
 
-    :param as_generic: True if specific keys such as "numpadsubstract" should be treated as
+    :param keycode: (optional) a known keycode to prime the resulatant list. In the case of
+    capturing a keypress, we'll know the keycode of the unmodified key that was pressed,
+    along with a list of modifiers, if any. In that case, the keycode is passed in here,
+    and the modifiers list is passed in as the `keystroke_expression`.
+
+    :param as_generic: True if specific keys such as "numpadsubtract" should be treated as
     their generic equivalent ("-"). Defaults to False.
 
     :return: A list of integers, sorted from low to high. For example, `shift+alt+plus`
@@ -145,19 +150,24 @@ def parse_keystroke_expression(keystroke_expression: Union[List, str], as_generi
 
     :raises ValueError: If a part of the expression is invalid.
     """
-    if isinstance(keystroke_expression, List):
-        parts = [key_str.casefold() for key_str in keystroke_expression]
-    else:
-        parts = keystroke_expression.casefold().split("+")
+    key_ints = [keycode] if keycode else []
 
-    if len(parts) == 0:
-        return []
+    if isinstance(keystroke_expression, str):
+        keystroke_expression = keystroke_expression.strip()
+        if not keystroke_expression:
+            return key_ints
+        keystroke_expression = keystroke_expression.split("+")
+
+    parts = [key_str.casefold().strip() for key_str in keystroke_expression]
+
+    if not parts:
+        return key_ints
 
     if as_generic and parts[-1] in KEYCODE_GENERICS:
         parts[-1] = KEYCODE_GENERICS[parts[-1]]
+
     try:
-        key_ints = [KEYCODES[parts[-1]]]
-        key_ints.extend(KEYCODES[part] for part in parts[:-1])
+        key_ints.extend(KEYCODES[part] for part in parts)
     except IndexError as e:
         raise ValueError(keystroke_expression) from e
 
@@ -211,5 +221,3 @@ def resolve_keybindings(raw_keybindings: Dict) -> Dict:
         parse_keystroke_expression(value): key
         for key, value in raw_keybindings.items()
     }
-
-

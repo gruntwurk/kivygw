@@ -13,6 +13,7 @@ from .utils.numeric import *
 from .utils.strings import *
 from .utils.class_utils import *
 from .utils.widget_tools import *
+from .utils.keystrokes import *
 from .app_support.dialogs import *
 from .app_support.screens import *
 from .app_support.main_window_config import *
