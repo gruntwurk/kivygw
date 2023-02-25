@@ -33,7 +33,6 @@ class MultiKeystrokeListener(Widget):
     the system handle it.
     """
 
-    shortcut_index = DictProperty({})
     '''
     :attr:`shortcut_index` is a :class:`~kivy.properties.DictProperty` and defaults to an empty dictionary.
     '''
@@ -48,14 +47,13 @@ class MultiKeystrokeListener(Widget):
         #     pass
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
         self._keyboard.bind(on_key_up=self._on_keyboard_up)
-        self.on_kv_post = self.further_init
         self.app: App = App.get_running_app()
 
-    def further_init(self, base_widget):
-        # Establish the shortcut index dictioanry
-        self.shortcut_index = {}
-        # For convenience, set a link to the dictionary at the app level.
-        self.app.shortcut_index = self.shortcut_index
+    @property
+    def shortcut_index(self):
+        if not hasattr(self.app,'shortcut_index'):
+            self.app.shortcut_index = {}
+        return self.app.shortcut_index
 
     def _keyboard_closed(self):
         pass

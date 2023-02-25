@@ -5,6 +5,7 @@ from typing import Dict, List, Tuple, Union
 
 __all__ = [
     "parse_keystroke_expression",
+    "keystroke_expression",
     "generic_keystroke",
     "resolve_keybindings",
 ]
@@ -92,6 +93,12 @@ KEYCODES = {
     'del': 127,  # delete
 }
 
+KEYNAMES = {}
+for name, number in KEYCODES.items():
+    if name == 'minus':
+        break
+    KEYNAMES[number] = name
+
 # A mapping of specific keys to their generic equivalent.
 KEYCODE_GENERICS = {
     'numpad0': '0',
@@ -172,6 +179,17 @@ def parse_keystroke_expression(keystroke_expression: Union[List, str], keycode: 
         raise ValueError(keystroke_expression) from e
 
     return sorted(key_ints)
+
+
+def keystroke_expression(keystroke_codes: List[int]) -> str:
+    """
+    The opposite of `parse_keystroke_expression`.
+    
+    :param keystroke_codes: A list of keystroke codes (integers), e.g. `[43, 304, 308]`.
+    :return: The corresponding keystroke expression, e.g. `shift+alt+plus`.
+    """
+    names = [KEYNAMES[code] for code in sorted(keystroke_codes, reverse=True)]
+    return "+".join(names)
 
 
 def generic_keystroke(actual_keystroke: Tuple[int]) -> Tuple[int]:

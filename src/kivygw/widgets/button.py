@@ -1,10 +1,9 @@
 import logging
 
 from kivy.uix.button import Button
-from kivy.properties import ObjectProperty
+from kivy.properties import StringProperty
 
-from ..utils.exceptions import ConfigError
-from ..widgets.action import CommandAction
+from ..widgets.action import CommandActionable
 from ..utils.colors import NamedColor
 from .background import BackgroundColor
 
@@ -16,23 +15,27 @@ __all__ = [
 ]
 
 
-class GWButton(Button, BackgroundColor):
+class GWButton(Button, BackgroundColor, CommandActionable):
     """
-    A variation of the kivy Button widget that also inherits from BackgroundColor.
-    It defaluts to having no background image so that the background color
+    A variation of the kivy Button widget that also inherits from
+    `BackgroundColor` and `CommandActionable`.  It defaults to
+    having no background image so that the background color
     is not muddled. The default background color is 20% gray.
     """
 
-    command_action = ObjectProperty(None)
+    button_color = StringProperty("GRAY80")
 
     def __init__(self, **kwargs):
         self.background_normal = ''
+        self.background_down = ''
+        self.background_disabled_normal = ''
+        self.background_disabled_down = ''
         self.background_color = NamedColor.GRAY80.float_tuple()
-        self._command_action = None
+        self.color = NamedColor.BLACK.float_tuple()
         super().__init__(**kwargs)
 
-    def on_command_action(self, instance, value):
-        if not isinstance(value, CommandAction):
-            raise ConfigError("command_action value must be an instance of CommandAction")
-        value.attach_to(self)
+    def on_button_color(self, instance, color_name):
+        named_color = NamedColor.by_name(color_name)
+        self.background_color = named_color.float_tuple()
+        self.color = named_color.outline().float_tuple()
 
