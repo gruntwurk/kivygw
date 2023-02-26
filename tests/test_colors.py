@@ -1,4 +1,6 @@
-from kivygw import NamedColor
+from kivygw import NamedColor, float_tuple
+from kivygw.utils.colors import int_tuple, is_float_tuple
+import pytest
 
 
 def test_NamedColor_construction():
@@ -21,8 +23,8 @@ def test_NamedColor_construction():
 
 def test_NamedColor_methods():
     assert NamedColor.AZURE.hex_format() == "#F0FFFF"
-    # assert NamedColor.AZURE1.float_tuple() == (0.0, 0.0, 0.0, 1.0)
-    # assert NamedColor.AZURE1.float_tuple(alpha=0.5) == (0.0, 0.0, 0.0, 0.5)
+
+    assert NamedColor.AZURE2.float_tuple() == float_tuple((224, 238, 238))  # AZURE2 = (224, 238, 238)
     assert NamedColor.BLACK.is_standard()
     assert not NamedColor.TURQUOISEBLUE.is_standard()
 
@@ -34,7 +36,7 @@ def test_NamedColor_methods():
     assert NamedColor.MINTCREAM.outline() == NamedColor.BLACK
 
     assert NamedColor.INDIANRED4.brightness() == 85
-    assert NamedColor.INDIANRED4.gray_version() == NamedColor.SGIDARKGRAY
+    assert NamedColor.INDIANRED4.gray_version() == NamedColor.SGIDARKGRAY  # between GRAY33 and GRAY34, FYI
     assert NamedColor.INDIANRED4.lighter() == NamedColor.ROSYBROWN3
     assert NamedColor.INDIANRED4.darker() == NamedColor.SEPIA
     assert NamedColor.INDIANRED4.subdued() == NamedColor.ROSYBROWN3
@@ -47,5 +49,46 @@ def test_NamedColor_methods():
     assert NamedColor.MIDNIGHTBLUE.subdued() == NamedColor.SGILIGHTBLUE
     assert NamedColor.MIDNIGHTBLUE.outline() == NamedColor.WHITE
 
+
+def test_float_tuples():
+    assert is_float_tuple((0.5, 0.0, 1.0))
+    assert is_float_tuple((0.5, 0.0, 1.0, 1.0))
+    assert is_float_tuple((0, 0, 0, 0))
+    assert is_float_tuple((0, 0, 0, 1))
+    assert is_float_tuple((0, 0, 1, 1))
+    assert is_float_tuple((0, 1, 1, 1))
+    assert is_float_tuple((1, 1, 1, 1))
+    assert is_float_tuple((0, 0, 0))
+    assert is_float_tuple((1, 1, 1))
+    assert not is_float_tuple((2, 1, 1, 1))
+    assert not is_float_tuple((0.5, 0.5, 0.5, 1.1))
+    assert not is_float_tuple((0.5, 0.5, 1.1))
+    assert not is_float_tuple((-0.1, 1, 1, 1))
+    assert len(float_tuple((224, 238, 238))) == 3
+    assert len(float_tuple((224, 238, 238, 99))) == 4
+    with pytest.raises(ValueError) as e_info:
+        _ = float_tuple((224, 238))
+        assert e_info == "float_tuple() requires a 3-tuple or a 4-tuple, but a 2-tuple was given."
+    with pytest.raises(ValueError) as e_info:
+        _ = float_tuple((224, 238, 30, 40, 50))
+        assert e_info == "float_tuple() requires a 3-tuple or a 4-tuple, but a 5-tuple was given."
+
+    ft = float_tuple((224, 238, 238))
+    assert is_float_tuple(ft)
+    assert ft[0] < 1.0
+    assert ft[1] < 1.0
+    assert ft[2] < 1.0
+    it = int_tuple(ft)
+    assert it == (224, 238, 238)
+
+    assert int_tuple((0, 0, 0)) == (0, 0, 0)
+    assert int_tuple((0, 0, 0, 0)) == (0, 0, 0, 0)
+
+    assert int_tuple((1, 1, 1)) == (255, 255, 255)
+    assert int_tuple((1, 1, 1, 1)) == (255, 255, 255, 255)
+
+    assert int_tuple((0.25, 0.5, 0.75)) == (63, 127, 191)
+    assert int_tuple((0.25, 0.5, 0.75, 1.0)) == (63, 127, 191, 255)
+    assert int_tuple((0.25, 0.5, 0.75, 0.999)) == (63, 127, 191, 254)
 
 

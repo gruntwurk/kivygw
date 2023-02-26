@@ -1,6 +1,7 @@
 import logging
 
 from kivy.uix.button import Button
+from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import StringProperty
 
 from ..widgets.action import CommandActionable
@@ -12,7 +13,18 @@ LOG = logging.getLogger("kivygw")
 
 __all__ = [
     "GWButton",
+    "GWButtonBar",
 ]
+
+
+class GWButtonBar(BoxLayout):
+    """
+    A container for the action buttons.
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.size_hint = (1, None)
+        self.height = 30
 
 
 class GWButton(Button, BackgroundColor, CommandActionable):

@@ -25,7 +25,7 @@ class GWLabel(Label, BackgroundColor):
     * halign now defaults to 'left'.
     * valign now defaults to 'top'.
 
-    Foe example, if the label is 200px x 100px, and the text_padding is 8, then
+    For example, if the label is 200px x 100px, and the text_padding is 8, then
     the text rectangle will be 184 x 84 (centered), and the text will placed in
     the upper left of that.
     """

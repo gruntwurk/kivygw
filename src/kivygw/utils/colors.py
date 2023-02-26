@@ -8,6 +8,8 @@ __all__ = [
     'NamedColor',
     'color_parse',
     'float_tuple',
+    'int_tuple',
+    'is_float_tuple',
     'color_brightness',
     'color_subdued',
     'color_darker',
@@ -684,14 +686,14 @@ class NamedColor(Enum):
         '''Returns color in hex format'''
         return color_hex_format(self.value)
 
-    def float_tuple(self, alpha=256) -> Tuple:
+    def float_tuple(self) -> Tuple:
         '''
         Returns a tuple in which the values range from 0.0 to 1.0, and a fourth
         argument specifies the alpha level, also 0.0-1.0.
 
         :param alpha: The alpha value to use (between 0.0 and 1.0). Defaults to 1.0.
         '''
-        return float_tuple(self.value, alpha)
+        return float_tuple(self.value)
 
     @classmethod
     def by_name(cls, name: str):
@@ -797,41 +799,90 @@ def color_parse(expr: any, names=None) -> Tuple:
     return color
 
 
-def float_tuple(int_tuple, default_alpha=255) -> Tuple:
+def is_float_tuple(color_tuple) -> bool:
+    """
+    Analyzes a color tuple to see if it is a Kivy style with
+    floats (0.0 to 1.0), or a traditional style with ints (0-255).
+    NOTE: For a few edge cases (where all elements are exactly 0 or exactly 1)
+    tie goes to True (is floats). For all 0's, it's the same either way.
+    All 0's and 1's is rare for an int tuple but quite common for a float tuple
+    (WHITE, RED, GREEN, BLUE, CYAN, ...).
+
+    :param color_tuple: Either a 3- or 4-tuple.
+    :return: True if it is Kivy style.
+    """
+    return not any(value > 1.0 or value < 0.0 for value in color_tuple)
+
+
+def float_tuple(int_tuple) -> Tuple:
     '''
     Converts an RGB tuple from integers (0-255) to floats (0.0 to 1.0).
 
     :param int_tuple: Either a 3-tuple or a 4-tuple of integers (0-255)
 
-    :param alpha: The alpha value to use (between 0-255), in the event
-    that the int_tuple is not already a 4-tuple. Defaults to 255.
-
-    :return: A 4-tuple of floats.
+    :return: A corresponding tuple of floats.
     '''
+    def float_color(int_color):
+        return (int_color + 1) / 256
+
     if not int_tuple:
         return None
     if len(int_tuple) == 3:
         red, green, blue = int_tuple
-        alpha = default_alpha
+        alpha = None
     elif len(int_tuple) == 4:
         red, green, blue, alpha = int_tuple
     else:
         raise ValueError(f"float_tuple() requires a 3-tuple or a 4-tuple, but a {len(int_tuple)}-tuple was given.")
 
-    return ((red + 1) / 256, (green + 1) / 256, (blue + 1) / 256, (alpha + 1) / 256)
+    if alpha is not None:
+        return (float_color(red), float_color(green), float_color(blue), float_color(alpha))
+    return (float_color(red), float_color(green), float_color(blue))
+
+
+def int_tuple(float_tuple) -> Tuple:
+    '''
+    Converts an RGB tuple from floats (0.0 to 1.0) to integers (0 to 255).
+
+    :param int_tuple: Either a 3-tuple or a 4-tuple of floats (0.0 to 0.1)
+
+    :return: A corresponding tuple of ints.
+    '''
+    def int_color(float_color):
+        return min(int(float_color * 255), 255)
+
+    if not float_tuple:
+        return None
+    if len(float_tuple) == 3:
+        red, green, blue = float_tuple
+        alpha = None
+    elif len(float_tuple) == 4:
+        red, green, blue, alpha = float_tuple
+    else:
+        raise ValueError(f"int_tuple() requires a 3-tuple or a 4-tuple, but a {len(int_tuple)}-tuple was given.")
+    if alpha is not None:
+        return (int_color(red), int_color(green), int_color(blue), int_color(alpha))
+    return (int_color(red), int_color(green), int_color(blue))
 
 
 def color_brightness(int_tuple) -> int:
     """
-    Returns the average of the RGB values.
+    :param int_tuple: Either a 3- or 4-tuple of integers (0-255).
+    (The alpha channel is ignored.)
+
+    :return: The average of the RGB values.
     """
-    return int(sum(int_tuple) / 3)
+    red, green, blue = int_tuple
+    return int((red + green + blue) / 3)
 
 
 def color_gray_version(int_tuple) -> Tuple:
     """
-    Returns the corresponding grayscale color (determined by average
-    brightness).
+    :param int_tuple: Either a 3- or 4-tuple of integers (0-255).
+    (The alpha channel is ignored.)
+
+    :return: A 3-tuple of ints for the corresponding grayscale color
+    (determined by average brightness).
     """
     gray = color_brightness(int_tuple)
     return (gray, gray, gray)
@@ -839,51 +890,85 @@ def color_gray_version(int_tuple) -> Tuple:
 
 def color_lighter(int_tuple) -> Tuple:
     """
-    Returns a color tuple that is halfway between the brightness of
+    :param int_tuple: Either a 3- or 4-tuple of integers (0-255).
+    (The alpha channel is ignored.)
+
+    :return: A 3-tuple that is halfway between the brightness of
     this color and that of full white.
     """
-    r, g, b = int_tuple
-    r = int(r + (255 - r) / 2)
-    g = int(g + (255 - g) / 2)
-    b = int(b + (255 - b) / 2)
-    return (r, g, b)
+    red, green, blue = int_tuple
+    red = int(red + (255 - red) / 2)
+    green = int(green + (255 - green) / 2)
+    blue = int(blue + (255 - blue) / 2)
+    return (red, green, blue)
 
 
 def color_darker(int_tuple) -> Tuple:
     """
-    Returns a color tuple that is half as bright.
+    :param int_tuple: Either a 3- or 4-tuple of integers (0-255).
+    (The alpha channel is ignored.)
+
+    :return: A 3-tuple that is half as bright.
     """
-    r, g, b = int_tuple
-    r = int(r / 2)
-    g = int(g / 2)
-    b = int(b / 2)
-    return (r, g, b)
+    red, green, blue = int_tuple
+    red = int(red / 2)
+    green = int(green / 2)
+    blue = int(blue / 2)
+    return (red, green, blue)
 
 
-def color_subdued(int_tuple) -> Tuple:
+def color_subdued(color_tuple) -> Tuple:
     """
     Returns a darker/lighter version of this color that may be suitable to use as a
     background color (e.g. pink for red, light gray for dark gray, and vice versa).
+
+        :param color_tuple: Can be either Kivy style with floats (0.0 to 1.0),
+    or a traditional style with ints (0-255), with optional alpha channel,
+    i.e. 3 or 4 elements.
+
+    :return: A 3-tuple of the corresponding type (floats or ints)
     """
-    is_dark = color_brightness(int_tuple) < 128
-    return color_lighter(int_tuple) if is_dark else color_darker(int_tuple)
+    if was_float := is_float_tuple(color_tuple):
+        color_tuple = int_tuple(color_tuple)
+    is_dark = color_brightness(color_tuple) < 128
+    result = color_lighter(color_tuple) if is_dark else color_darker(color_tuple)
+    return float_tuple(result) if was_float else result
 
 
-def color_outline(int_tuple) -> Tuple:
+def color_outline(color_tuple) -> Tuple:
     """
     Returns either black or white, depending on if this color is light or dark
     (e.g. to outline it in case the original color is hard to see).
+
+    :param color_tuple: Can be either Kivy style with floats (0.0 to 1.0),
+    or a traditional style with ints (0-255), with optional alpha channel,
+    i.e. 3 or 4 elements.
+
+    :return: A 3-tuple of the corresponding type (floats or ints)
     """
-    is_dark = color_brightness(int_tuple) < 128
-    return (256, 256, 256) if is_dark else (0, 0, 0)
+    if was_float := is_float_tuple(color_tuple):
+        color_tuple = int_tuple(color_tuple)
+    is_dark = color_brightness(color_tuple) < 128
+    result = (256, 256, 256) if is_dark else (0, 0, 0)
+    return float_tuple(result) if was_float else result
 
 
-def color_hex_format(int_tuple) -> str:
-    '''Returns color in hex format'''
-    if len(int_tuple) == 3:
-        return '#{:02X}{:02X}{:02X}'.format(*int_tuple)
-    elif len(int_tuple) == 4:
-        return '#{:02X}{:02X}{:02X}{:02X}'.format(*int_tuple)
+def color_hex_format(color_tuple) -> str:
+    """
+    Returns the color in hex format.
+
+    :param color_tuple: Can be either Kivy style with floats (0.0 to 1.0),
+    or a traditional style with ints (0-255), with optional alpha channel,
+    i.e. 3 or 4 elements.
+
+    :return: A 6- or 8-digit hex string with a "#" prefix.
+    """
+    if is_float_tuple(color_tuple):
+        color_tuple = int_tuple(color_tuple)
+    if len(color_tuple) == 3:
+        return '#{:02X}{:02X}{:02X}'.format(*color_tuple)
+    elif len(color_tuple) == 4:
+        return '#{:02X}{:02X}{:02X}{:02X}'.format(*color_tuple)
     return ''
 
 
@@ -897,11 +982,11 @@ def color_distance(int_tuple1, int_tuple2) -> float:
 
     Credit: Inspired by reportlab.lib.colors.
     """
-    r1, g1, b1 = int_tuple1
-    r2, g2, b2 = int_tuple2
-    if (r1 == r2) and (g1 == g2) and (b1 == b2):
+    red1, green1, blue1 = int_tuple1
+    red2, green2, blue2 = int_tuple2
+    if (red1 == red2) and (green1 == green2) and (blue1 == blue2):
         return 0.0  # avoid math rounding issues
-    return math.sqrt((r1 - r2)**2 + (g1 - g2)**2 + (b1 - b2)**2)
+    return math.sqrt((red1 - red2)**2 + (green1 - green2)**2 + (blue1 - blue2)**2)
 
 
 def as_color(input: any) -> Tuple:
