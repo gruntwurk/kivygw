@@ -97,6 +97,12 @@ class CommandAction(Widget):
         super().__init__(**kwargs)
         self.app: App = App.get_running_app()
 
+    @property
+    def shortcut_index(self):
+        """Convienence getter for the shortcut_index dictionary, which is kept in the app."""
+        if not hasattr(self.app, 'shortcut_index'):
+            self.app.shortcut_index = {}
+        return self.app.shortcut_index
 
     @property
     def shortcut(self):
@@ -140,7 +146,7 @@ class CommandAction(Widget):
     def register_keyboard_shortcut(self):
         # Casting the ListProperty to a tuple is necessary to make it hashable.
         if self.shortcut_codes:
-            self.app.shortcut_index[tuple(self.shortcut_codes)] = self
+            self.shortcut_index[tuple(self.shortcut_codes)] = self
 
     def find_and_set_handler(self, associated_widget: Widget):
         """
