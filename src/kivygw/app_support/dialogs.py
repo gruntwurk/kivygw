@@ -54,7 +54,6 @@ class GWDialog(ABC):
         CONTROLS_HEIGHT = 30
         w, h, x, y = optimal_dialog_size(prefered_width, prefered_height)
 
-        # self._inner_box = RelativeLayout(size_hint_y=None, height=h - CONTROLS_HEIGHT, pos_hint={"top": 1})
         self._inner_box = RelativeLayout(size_hint_y=1.0, pos_hint={"top": 1})
         self._controls_box = BoxLayout(size_hint_y=None, height=CONTROLS_HEIGHT, orientation="horizontal", pos_hint={"y": 0})
         self._outer_box = BoxLayout(orientation="vertical")
@@ -64,6 +63,21 @@ class GWDialog(ABC):
         self._popup.width = w
         self._popup.height = h
         self._popup.pos = (x, y)
+        self._popup.auto_dismiss = False
+
+    def use_label_for_payload(self):
+        """Basic dialogs use a simple Label widget for the dialog body."""
+        self._payload = Label(pos_hint={"center_x": 0.5, "center_y": 0.5})
+        self._payload.bind(texture=self.adjust_label_size)
+        self.add_widget(self._payload)
+
+    def adjust_label_size(self, instance, texture):
+        if texture:
+            increase_width_by = max(texture.width - instance.width, 0)
+            increase_height_by = max(texture.height - instance.height, 0)
+
+            self._popup.width += increase_width_by
+            self._popup.height += increase_height_by
 
     @property
     def buttons(self):
@@ -95,8 +109,6 @@ class GWDialog(ABC):
         self._user_callback_cancel = user_on_cancel
 
     def add_widget(self, widget, *args, **kwargs):
-        # widget.height = self._inner_box.height
-        # widget.width = self._inner_box.width
         widget.pos_hint = {"center_x": 0.5, "center_y": 0.5}
         return self._inner_box.add_widget(widget, *args, **kwargs)
 
@@ -121,9 +133,9 @@ class GWDialog(ABC):
 class InformDialog(GWDialog):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
-        # self._msg = Label(size_hint_y=None, height=30, pos_hint={"center_x": 0.5, "center_y": 0.5}, valign='center', halign='center')
-        self._payload = Label(pos_hint={"center_x": 0.5, "center_y": 0.5})
-        self.add_widget(self._payload)
+        self.use_label_for_payload()
+        # Let's allow clicking outside the box to dismiss it since, in this case of an FYI dialog, there's no harm in that
+        self._popup.auto_dismiss = True
 
     def inform(self, msg):
         if isinstance(msg, list):
@@ -135,25 +147,26 @@ class InformDialog(GWDialog):
     def on_ok(self):
         self._popup.dismiss()
         if self._user_callback_ok:
-            self._user_callback_ok(self._result)
+            self._user_callback_ok(True)
 
     def on_cancel(self, *args):
         self._popup.dismiss()
-        if self._user_callback_cancel:
-            self._user_callback_cancel()
-        elif self._user_callback_ok:
-            self._user_callback_ok(None)
+        if self._user_callback_ok:
+            self._user_callback_ok(False)
 
 
-def inform_user(msg, on_ok: Callable = None, on_cancel: Callable = None, ok="OK", title="Information"):
+def inform_user(msg, on_ok: Callable = None, ok="OK", title="Information"):
     """
     Pops up a modal dialog to inform the user of something.
     :param msg: The text of the information.
+    :param on_ok: A callable (that accepts at least one parameter) which will
+        be called when the user clicks `OK` to close the dialog. It will always
+        be passed True (to be consistent with `ask_user_yes_no`).
     :param ok: The wording on the OK button (default: "OK")
     :param title: The title of the dialog box (default: "Information")
     """
     dlg = InformDialog()
-    dlg.set_user_callbacks(on_ok, on_cancel)
+    dlg.set_user_callbacks(on_ok)
     dlg.buttons = {"ok": ok}
     dlg.title = title
     dlg.inform(msg)
@@ -167,8 +180,8 @@ def inform_user(msg, on_ok: Callable = None, on_cancel: Callable = None, ok="OK"
 class YesNoDialog(GWDialog):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
-        self._payload = Label(valign='center', halign='center')
-        self.add_widget(self._payload)
+        self.use_label_for_payload()
+
 
     def ask(self, msg):
         self._payload.text = msg
@@ -177,14 +190,14 @@ class YesNoDialog(GWDialog):
     def on_ok(self):
         self._popup.dismiss()
         if self._user_callback_ok:
-            self._user_callback_ok(self._result)
+            self._user_callback_ok(True)
 
     def on_cancel(self, *args):
         self._popup.dismiss()
         if self._user_callback_cancel:
             self._user_callback_cancel()
         elif self._user_callback_ok:
-            self._user_callback_ok(None)
+            self._user_callback_ok(False)
 
 
 def ask_user_yes_no(msg, on_yes: Callable, on_no: Callable = None, yes="YES", no="NO", title="Question") -> None:
@@ -194,12 +207,14 @@ def ask_user_yes_no(msg, on_yes: Callable, on_no: Callable = None, yes="YES", no
         is needed to act on the answer.
 
     :param msg: The text of the question to ask.
-    :param on_yes: A function/method that is called if the user answers "yes".
-    :param on_no: A function/method that is called if the user answers "no" --
-        Alternatively, if on_no is None (default), then the on_yes function will
-        be called instead but will passed a value of None. In that case, make
-        sure the function is declared to accept a single argument with a
-        default value of True.
+    :param on_yes: A callable (that accepts at least one parameter) which will
+        be called if the user answers "yes" (called with a value of `True`).
+        It might also be called if the user answers "no" (in which case it'll
+        be called with a value of `False`).
+    :param on_no: A callable that takes no parameters which is called if the
+        user answers "no" -- Alternatively, if `on_no` is `None` (default), then
+        the `on_yes` function will be called instead (and passed a value of
+        `False`, as noted above).
     :param title: The title of the dialog box (default: "Question:")
     :param yes: The wording on the Yes button (default: "Yes")
     :param no: The wording on the No button (default: "No")
@@ -209,7 +224,6 @@ def ask_user_yes_no(msg, on_yes: Callable, on_no: Callable = None, yes="YES", no
     dlg.set_user_callbacks(on_yes, on_no)
     dlg.buttons = {"ok": yes, "cancel": no}
     dlg.title = title
-    # dlg = YesNoDialog(on_ok=on_yes, on_cancel=on_no, ok_button=yes, cancel_button=no, title=title)
     dlg.ask(msg)
 
 

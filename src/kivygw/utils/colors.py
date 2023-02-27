@@ -872,7 +872,7 @@ def color_brightness(int_tuple) -> int:
 
     :return: The average of the RGB values.
     """
-    red, green, blue = int_tuple
+    red, green, blue = int_tuple[:3]
     return int((red + green + blue) / 3)
 
 
