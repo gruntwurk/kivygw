@@ -1,7 +1,7 @@
 import logging
 
 from kivy.uix.label import Label
-from kivy.properties import NumericProperty
+from kivy.properties import NumericProperty, ReferenceListProperty
 from .background import BackgroundColor
 from ..utils.colors import NamedColor
 
@@ -19,7 +19,7 @@ class GWLabel(BackgroundColor, Label):
     alloted to the label (rather than always centering the text).
     It also inherits from BackgroundColor. Thus, all of these properties can be combined:
 
-    * text_padding (new) defaults to 8.
+    * text_padding (new) defaults to [6, 2] (i.e. left/right = x = 6, top/bottom = y = 2)
     * background_color (from BackgroundColor) is required.
     * halign now defaults to 'left'.
     * valign now defaults to 'top'.
@@ -28,8 +28,9 @@ class GWLabel(BackgroundColor, Label):
     the text rectangle will be 184 x 84 (centered), and the text will placed in
     the upper left of that.
     """
-
-    text_padding = NumericProperty(8)
+    text_padding_x = NumericProperty(6)
+    text_padding_y = NumericProperty(2)
+    text_padding = ReferenceListProperty(text_padding_x, text_padding_y)
 
     def __init__(self, **kwargs):
         # LOG.trace("GWLabel initiated.")
@@ -38,12 +39,14 @@ class GWLabel(BackgroundColor, Label):
         self.valign = 'top'
         self.bind(pos=self.recalc_text_size)
         self.bind(size=self.recalc_text_size)
+        self.bind(texture=self.adjust_entry_height)
 
-    def on_texture_size(self, *args):
+    def adjust_entry_height(self, instance, texture):
+        if not texture:
+            return
         # LOG.trace("Reacting to texture size change")
-        text_actual_height = self.texture_size[1]
-        new_height = text_actual_height + (2 * self.text_padding)
-        # This if-statament gaurds against an infinate loop (changing the height calls on_size)
+        new_height = texture.height + (2 * self.text_padding_y)
+        # This if-statement guards against an infinate loop (changing the height calls on_size)
         # LOG.debug("new_height = {}".format(new_height))
         # LOG.debug("self.height = {}".format(self.height))
         if new_height != self.height:
@@ -52,7 +55,7 @@ class GWLabel(BackgroundColor, Label):
 
     def recalc_text_size(self, *args):
         LOG.trace("recalc_text_size")
-        text_width_available = self.size[0] - (2 * self.text_padding)
+        text_width_available = self.size[0] - (2 * self.text_padding_x)
         # LOG.debug("current text_width = {}".format(self.text_size[0]))
         # LOG.debug("text_width_available = {}".format(text_width_available))
         if self.text_size[0] != text_width_available:

@@ -1,12 +1,12 @@
 import logging
 
-from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import ColorProperty
+from kivy.uix.label import Label
+from kivy.uix.behaviors import ButtonBehavior
+
+from kivygw.widgets.label import GWLabel
 
 from ..widgets.action import CommandActionable
-from ..utils.colors import NamedColor, color_outline, color_subdued
-from .background import BackgroundColor
 
 LOG = logging.getLogger("main")
 
@@ -27,27 +27,24 @@ class GWButtonBar(BoxLayout):
         self.height = 30
 
 
-class GWButton(Button, BackgroundColor, CommandActionable):
+class GWButton(CommandActionable, ButtonBehavior, GWLabel):
     """
-    A variation of the kivy Button widget that also inherits from
-    `BackgroundColor` and `CommandActionable`. It defaults to
-    having no background image so that the background color
-    is not muddled.
+    An alternative to the kivy Button widget that also inherits from
+    `CommandActionable` and `BackgroundColor` (via `GWLabel`).
     """
+
+    # FYI, Inherited properties:
+
+    # BackgroundColor.background_color = ColorProperty()
+    # BackgroundColor.border_color = ColorProperty()
+    # BackgroundColor.border_width = NumericProperty(2)
+    # BackgroundColor.corner_radius = ListProperty([3,])
+    # CommandActionable.shortcut = StringProperty("")
+    # CommandActionable.handler_name = StringProperty("")
+    # GWLabel.text_padding = NumericProperty(8)
 
     def __init__(self, **kwargs):
-        # LOG.trace("GWButton initiated.")
         super().__init__(**kwargs)
-        self.background_normal = ''
-        self.background_down = ''
-        self.background_disabled_normal = ''
-        self.background_disabled_down = ''
+
         self.background_color = 'gray'
         self.color = 'black'
-
-    # def on_background_color(self, instance, color):
-    #     self.color = color_outline(color)
-    #     self.border_color = color_outline(color)  # color_subdued(color)
-    #     LOG.debug(f"GWButton.border_color = {self.border_color}")
-    #     LOG.debug(f"GWButton.border_width = {self.border_width}")
-

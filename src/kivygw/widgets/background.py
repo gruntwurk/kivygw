@@ -1,7 +1,7 @@
 import logging
 from kivy.uix.widget import Widget
-from kivy.graphics import Canvas, Color, Rectangle
-from kivy.properties import ColorProperty, NumericProperty
+from kivy.graphics import Canvas, Color, RoundedRectangle
+from kivy.properties import ColorProperty, NumericProperty, ListProperty
 
 from kivygw.utils.colors import color_subdued
 
@@ -23,14 +23,16 @@ class BackgroundColor(Widget):
         background_color: 0, 1, 0, 0.25
         border_width: 2
         border_color: 1, 0, 0, 0.25
+        corner_radius: 0
 
     ~~~~
 
     See also GWLabel.
     """
-    background_color = ColorProperty()
-    border_color = ColorProperty()
+    background_color = ColorProperty('silver')
+    border_color = ColorProperty(None)
     border_width = NumericProperty(2)
+    corner_radius = ListProperty([3,])
 
     def __init__(self, **kwargs):
         # LOG.trace("BackgroundColor Mixin initiated.")
@@ -44,10 +46,10 @@ class BackgroundColor(Widget):
 
         c: Canvas = self.canvas
         with c.before:
-            self.outer_color = Color(rgba=self.border_color or self.background_color)
-            self.outer_rect = Rectangle(pos=self.pos, size=self.size)
-            self.inner_color = Color(rgba=self.background_color if self.border_color else TRANSPARENT)
-            self.inner_rect = Rectangle(pos=self.pos, size=self.size)
+            self.outer_color = Color(self.background_color)
+            self.outer_rect = RoundedRectangle(pos=self.pos, size=self.size, radius=self.corner_radius)
+            self.inner_color = Color(rgba=TRANSPARENT)
+            self.inner_rect = RoundedRectangle(pos=self.pos, size=self.size, radius=self.corner_radius)
 
         self.update_rect_colors()
         self.update_rect_sizes()
@@ -63,8 +65,8 @@ class BackgroundColor(Widget):
     def update_rect_sizes(self, *args):
         self.outer_rect.pos = self.pos
         self.outer_rect.size = self.size
-        self.inner_rect.pos = (self.pos[0] + self.border_width, self.pos[1] + self.border_width)
-        self.inner_rect.size = (self.size[0] - self.border_width * 2, self.size[1] - self.border_width * 2)
+        self.inner_rect.pos = (self.x + self.border_width, self.y + self.border_width)
+        self.inner_rect.size = (self.width - self.border_width * 2, self.height - self.border_width * 2)
 
 
 
