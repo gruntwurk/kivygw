@@ -3,7 +3,7 @@ from kivy.uix.widget import Widget
 from kivy.graphics import Canvas, Color, RoundedRectangle
 from kivy.properties import ColorProperty, NumericProperty, ListProperty
 
-from kivygw.utils.colors import color_subdued
+from kivygw.utils.colors import color_outline, color_subdued
 
 LOG = logging.getLogger("kivygw")
 TRANSPARENT = (0, 0, 0, 0)
@@ -57,8 +57,9 @@ class BackgroundColor(Widget):
     def update_rect_colors(self, *args):
         # LOG.debug(f"BackgroundColor.background_color = {self.background_color}")
         # LOG.debug(f"BackgroundColor.border_color = {self.border_color}")
-        if not self.border_color:
-            self.border_color = color_subdued(self.background_color)
+        self.border_color = [0, 0, 0, 0]  # color_subdued(self.background_color)
+        self.color = color_outline(self.background_color)
+
         self.outer_color.rgba = self.border_color
         self.inner_color.rgba = self.background_color
 

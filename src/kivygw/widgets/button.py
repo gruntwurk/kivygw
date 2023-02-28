@@ -36,12 +36,12 @@ class GWButton(CommandActionable, ButtonBehavior, GWLabel):
     # FYI, Inherited properties:
 
     # BackgroundColor.background_color = ColorProperty()
-    # BackgroundColor.border_color = ColorProperty()
-    # BackgroundColor.border_width = NumericProperty(2)
-    # BackgroundColor.corner_radius = ListProperty([3,])
-    # CommandActionable.shortcut = StringProperty("")
-    # CommandActionable.handler_name = StringProperty("")
-    # GWLabel.text_padding = NumericProperty(8)
+    # BackgroundColor.border_color
+    # BackgroundColor.border_width
+    # BackgroundColor.corner_radius
+    # CommandActionable.shortcut
+    # CommandActionable.handler_name
+    # GWLabel.text_padding
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

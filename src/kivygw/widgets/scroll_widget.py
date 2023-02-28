@@ -51,6 +51,10 @@ class GWResultsLogPair(BoxLayout):
         self.entry_info = GWLabel(size_hint=(.85, 1.0))
         self.add_widget(self.entry_name)
         self.add_widget(self.entry_info)
+        self.entry_info.bind(size=self.update_size)
+
+    def update_size(self, instance, size):
+        self.height = size[1]
 
 
 class GWResultsLogSingle(GWLabel):
