@@ -94,13 +94,16 @@ class GWResultsLogEntry(GWLabel):
 
 class GWScrollingResultsLog(GWScrollView):
 
+    default_name_color = ColorProperty(DEFAULT_NAME_COLOR)
+    default_info_color = ColorProperty(DEFAULT_INFO_COLOR)
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.on_kv_post = self.further_init
         self.sections = {}
 
-    def further_init(self, base_widget):
+    def on_kv_post(self, base_widget):
         self.initialize_actual_results_log_layout()
+        super().on_kv_post(base_widget)
 
     def initialize_actual_results_log_layout(self):
         self.results_log_actual = BoxLayout(orientation='vertical', size_hint_y=None, padding=4, spacing=4)
@@ -109,7 +112,7 @@ class GWScrollingResultsLog(GWScrollView):
 
     def log_result(self, message: str, entry_color=None):
         if not entry_color:
-            entry_color = DEFAULT_INFO_COLOR
+            entry_color = self.default_info_color
         fg_color = color_outline(entry_color)
         msg_label = GWResultsLogEntry(text=message, color=fg_color, background_color=entry_color)
         self.results_log_actual.add_widget(msg_label)
@@ -128,11 +131,15 @@ class GWScrollingResultsLog(GWScrollView):
         if section_name in self.sections:
             section = self.sections[section_name]
         else:
-            section = GWResultsLogSection()
+            section = GWResultsLogSection(
+                name_color=name_color or self.default_name_color,
+                info_color=info_color or self.default_info_color
+                )
             section.section_name.text = section_name
             self.sections[section_name] = section
-            self.results_log_actual.add_widget(section, index=-1)  # index=1 means at the bottom except just above the filler
+            self.results_log_actual.add_widget(section)
 
         if isinstance(section_info, list):
             section_info = '\n'.join(section_info)
+
         section.section_info.text = section_info

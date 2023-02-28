@@ -164,7 +164,8 @@ class CommandAction(Widget):
                 continue
             self.on_invoke = getattr(widget, handler_method_name)
             return
-        LOG.warning(f"Could not find a handler_name named {handler_method_name} within any of {associated_widget}'s parent widgets.")
+        # No handler found, maybe we just haven't loaded the handler_name property directly yet
+
 
     def attach_to(self, associated_widget: Widget):
         if associated_widget in self.associated_widgets:
@@ -174,8 +175,6 @@ class CommandAction(Widget):
         associated_widget._command_action = self
         associated_widget.on_release = self.invoke
 
-        if not associated_widget.handler_name and hasattr(associated_widget, "text"):
-            associated_widget.handler_name = f'_{normalize_name(associated_widget.text).lower()}_action'
         self.find_and_set_handler(associated_widget)
 
         propogate_widget_text(associated_widget, self.text)
@@ -204,7 +203,7 @@ class CommandActionable(Widget):
         ...
     ~~~~
 
-    See also GWLabel.
+    See also GWButton.
     """
     shortcut = StringProperty("")
     handler_name = StringProperty("")
@@ -213,6 +212,7 @@ class CommandActionable(Widget):
         self.register_event_type('on_invoke')
         self._command_action = None
         super().__init__(**kwargs)
+        self.bind(text=self.calc_handler_name)
 
     @property
     def command_action(self) -> CommandAction:
@@ -235,10 +235,14 @@ class CommandActionable(Widget):
         # widget's `command_action` get-accessor does that for us.
         self.command_action.shortcut = keystroke_expression
 
+    def calc_handler_name(self, instance, text):
+        if not self.handler_name:
+            self.handler_name = f'_{normalize_name(text).lower()}_action'
+
     def on_handler_name(self, instance, handler_name):
         # Setting the name of the handler_name method in the associated widget is
         # just a convenience so that we don't have to manually declare the
         # `CommandAction` in the KV file and link it to the widget. The
         # widget's `command_action` get-accessor does that for us.
-        assert self.handler_name == handler_name
-        self.command_action.find_and_set_handler(self)
+        if self.command_action:
+            self.command_action.find_and_set_handler(self)

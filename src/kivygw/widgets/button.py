@@ -48,12 +48,10 @@ class GWButton(Button, BackgroundColor, CommandActionable):
         self.color = NamedColor.BLACK.float_tuple()
 
     def on_button_color(self, instance, color_name):
-        named_color = NamedColor.by_name(color_name)
-        # LOG.debug(f"on_button_color named_color = {named_color}")
-        if named_color:
+        if named_color := NamedColor.by_name(color_name):
             self.background_color = named_color.float_tuple()
             self.color = named_color.outline().float_tuple()
             self.border_color = named_color.outline().float_tuple(alpha=0.5)
-            # LOG.debug(f"self.border_color = {self.border_color}")
-            # LOG.debug(f"self.border_width = {self.border_width}")
+            LOG.debug(f"GWButton.border_color = {self.border_color}")
+            LOG.debug(f"GWButton.border_width = {self.border_width}")
 
