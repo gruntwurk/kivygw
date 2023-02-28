@@ -14,7 +14,7 @@ __all__ = [
 ]
 
 
-class GWLabel(Label, BackgroundColor):
+class GWLabel(BackgroundColor, Label):
     """
     A variation of the kivy Label widget that defaults to using the whole space
     alloted to the label (rather than always centering the text).
@@ -33,12 +33,12 @@ class GWLabel(Label, BackgroundColor):
     text_padding = NumericProperty(8)
 
     def __init__(self, **kwargs):
+        # LOG.trace("GWLabel initiated.")
         super().__init__(**kwargs)
         self.halign = 'left'
         self.valign = 'top'
-
-        # if self.background_padding < 4:
-        #     self.background_padding = 4
+        self.bind(pos=self.recalc_text_size)
+        self.bind(size=self.recalc_text_size)
 
     def on_texture_size(self, *args):
         # LOG.trace("Reacting to texture size change")
@@ -51,15 +51,7 @@ class GWLabel(Label, BackgroundColor):
             # LOG.debug("setting new height")
             self.height = new_height
 
-    def on_pos(self, *args):
-        # LOG.trace("Reacting to pos change")
-        self._determine_new_size()
-
-    def on_size(self, *args):
-        # LOG.trace("Reacting to size change")
-        self._determine_new_size()
-
-    def _determine_new_size(self):
+    def recalc_text_size(self, *args):
         text_width_available = self.size[0] - (2 * self.text_padding)
         # LOG.debug("current text_width = {}".format(self.text_size[0]))
         # LOG.debug("text_width_available = {}".format(text_width_available))
@@ -67,8 +59,6 @@ class GWLabel(Label, BackgroundColor):
             # LOG.trace("Recalculating text dimensions.")
             self.text_size = (text_width_available, None)
             self.texture_update()
-        else:
-            BackgroundColor.on_size(self)
 
 
 class GWStatusBar(Label):

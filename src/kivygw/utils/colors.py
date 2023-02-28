@@ -7,7 +7,9 @@ import math
 __all__ = [
     'NamedColor',
     'color_parse',
+    'float_color',
     'float_tuple',
+    'int_color',
     'int_tuple',
     'is_float_tuple',
     'color_brightness',
@@ -686,14 +688,14 @@ class NamedColor(Enum):
         '''Returns color in hex format'''
         return color_hex_format(self.value)
 
-    def float_tuple(self) -> Tuple:
+    def float_tuple(self, alpha=1.0) -> Tuple:
         '''
         Returns a tuple in which the values range from 0.0 to 1.0, and a fourth
         argument specifies the alpha level, also 0.0-1.0.
 
         :param alpha: The alpha value to use (between 0.0 and 1.0). Defaults to 1.0.
         '''
-        return float_tuple(self.value)
+        return float_tuple(self.value, alpha=alpha)
 
     @classmethod
     def by_name(cls, name: str):
@@ -814,52 +816,73 @@ def is_float_tuple(color_tuple) -> bool:
     return not any(value > 1.0 or value < 0.0 for value in color_tuple)
 
 
-def float_tuple(int_tuple) -> Tuple:
+def float_color(int_color):
+    '''
+    Converts an RGB value from integer (0-255) to float (0.0 to 1.0).
+    '''
+    return int_color / 255 if int_color is not None else None
+
+
+def float_tuple(int_tuple, alpha=None) -> Tuple:
     '''
     Converts an RGB tuple from integers (0-255) to floats (0.0 to 1.0).
 
     :param int_tuple: Either a 3-tuple or a 4-tuple of integers (0-255)
+    :param alpha: The alpha value to use (between 0.0 and 1.0).
+        Defaults to `None`. In the case of a 4-tuple, `None` means the alpha
+        value will be converted to float along with the RGB. In the case
+        of a 3-tuple, `None` means it will remain a 3-tuple.
 
     :return: A corresponding tuple of floats.
     '''
-    def float_color(int_color):
-        return (int_color + 1) / 256
-
     if not int_tuple:
         return None
     if len(int_tuple) == 3:
         red, green, blue = int_tuple
-        alpha = None
+        old_alpha = None
     elif len(int_tuple) == 4:
-        red, green, blue, alpha = int_tuple
+        red, green, blue, old_alpha = int_tuple
     else:
         raise ValueError(f"float_tuple() requires a 3-tuple or a 4-tuple, but a {len(int_tuple)}-tuple was given.")
+    if not alpha:
+        alpha = float_color(old_alpha)
 
     if alpha is not None:
-        return (float_color(red), float_color(green), float_color(blue), float_color(alpha))
+        return (float_color(red), float_color(green), float_color(blue), alpha)
     return (float_color(red), float_color(green), float_color(blue))
 
 
-def int_tuple(float_tuple) -> Tuple:
+def int_color(float_color):
+    '''
+    Converts an RGB value from float (0.0 to 1.0) to integer (0 to 255).
+    '''
+    return min(int(float_color * 255), 255) if float_color is not None else None
+
+
+def int_tuple(float_tuple, alpha=None) -> Tuple:
     '''
     Converts an RGB tuple from floats (0.0 to 1.0) to integers (0 to 255).
 
     :param int_tuple: Either a 3-tuple or a 4-tuple of floats (0.0 to 0.1)
+    :param alpha: The alpha value to use (between 0 and 255).
+        Defaults to `None`. In the case of a 4-tuple, `None` means the alpha
+        value will be converted to int along with the RGB. In the case
+        of a 3-tuple, `None` means it will remain a 3-tuple.
 
     :return: A corresponding tuple of ints.
     '''
-    def int_color(float_color):
-        return min(int(float_color * 255), 255)
-
     if not float_tuple:
         return None
     if len(float_tuple) == 3:
         red, green, blue = float_tuple
-        alpha = None
+        old_alpha = None
     elif len(float_tuple) == 4:
-        red, green, blue, alpha = float_tuple
+        red, green, blue, old_alpha = float_tuple
     else:
         raise ValueError(f"int_tuple() requires a 3-tuple or a 4-tuple, but a {len(int_tuple)}-tuple was given.")
+    if not alpha:
+        alpha = int_color(old_alpha)
+
     if alpha is not None:
         return (int_color(red), int_color(green), int_color(blue), int_color(alpha))
     return (int_color(red), int_color(green), int_color(blue))
