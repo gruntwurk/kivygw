@@ -5,8 +5,7 @@ from kivy.properties import NumericProperty
 from .background import BackgroundColor
 from ..utils.colors import NamedColor
 
-LOG = logging.getLogger("kivygw")
-
+LOG = logging.getLogger("main")
 
 __all__ = [
     "GWLabel",
@@ -52,6 +51,7 @@ class GWLabel(BackgroundColor, Label):
             self.height = new_height
 
     def recalc_text_size(self, *args):
+        LOG.trace("recalc_text_size")
         text_width_available = self.size[0] - (2 * self.text_padding)
         # LOG.debug("current text_width = {}".format(self.text_size[0]))
         # LOG.debug("text_width_available = {}".format(text_width_available))

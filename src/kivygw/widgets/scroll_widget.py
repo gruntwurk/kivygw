@@ -3,7 +3,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ColorProperty
 
-from kivygw.utils.colors import color_outline, NamedColor
+from kivygw.utils.colors import color_outline
 
 from .label import GWLabel
 
@@ -11,15 +11,12 @@ import logging
 
 LOG = logging.getLogger("main")
 
-
 __all__ = [
     "GWScrollView",
     "GWScrollingResultsLog",
     "GWResultsLogSection",
     "GWResultsLogEntry",
 ]
-
-GREEN_TRANSLUCENT = [0, 1, 0, 0.25]
 
 
 class GWScrollView(ScrollView):
@@ -38,8 +35,8 @@ class GWScrollView(ScrollView):
         self.bar_width = 6
 
 
-DEFAULT_NAME_COLOR = NamedColor.MINTCREAM.float_tuple()
-DEFAULT_INFO_COLOR = NamedColor.PALEGREEN.float_tuple()
+DEFAULT_NAME_COLOR = 'firebrick'
+DEFAULT_INFO_COLOR = 'gold'
 
 
 class GWResultsLogSection(BoxLayout):
@@ -47,29 +44,35 @@ class GWResultsLogSection(BoxLayout):
     info_color = ColorProperty(DEFAULT_INFO_COLOR)
 
     def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.size_hint_y = None
         self.size_hint_min_y: 20
-        super().__init__(**kwargs)
         self.section_name = GWLabel(
             size_hint=(.15, 1.0), size_hint_min_y=20,
-            color=color_outline(self.name_color), background_color=self.name_color,
+            # color=color_outline(self.name_color),
+            background_color=self.name_color,
             halign='right'
             )
         self.section_info = GWLabel(
             size_hint=(.85, 1.0), size_hint_min_y=20,
-            color=color_outline(self.info_color), background_color=self.info_color
+            # color=color_outline(self.info_color),
+            background_color=self.info_color
             )
         self.section_info.bind(texture=self.adjust_entry_height)
+        self.bind(name_color=self.update_name_color)
+        self.bind(info_color=self.update_info_color)
         self.add_widget(self.section_name)
         self.add_widget(self.section_info)
 
-    def on_name_color(self, new_color):
-        self.section_name.background_color = new_color
-        self.section_name.color = color_outline(new_color)
+    def update_name_color(self, instance, color):
+        self.section_name.background_color = color
+        self.section_name.color = color_outline(color)
+        self.section_name.border_color = color_outline(color)
 
-    def on_info_color(self, new_color):
-        self.section_info.background_color = new_color
-        self.section_info.color = color_outline(new_color)
+    def update_info_color(self, instance, color):
+        self.section_info.background_color = color
+        self.section_info.color = color_outline(color)
+        self.section_info.border_color = color_outline(color)
 
     def adjust_entry_height(self, instance, texture):
         if texture:
@@ -77,23 +80,23 @@ class GWResultsLogSection(BoxLayout):
 
 
 class GWResultsLogEntry(GWLabel):
-    entry_color = ColorProperty(DEFAULT_INFO_COLOR)
-
     def __init__(self, **kwargs):
-        self.color = color_outline(self.entry_color)
-        self.background_color = self.entry_color
         self.size_hint_min_y = 20
         self.size_hint_y = None
         self.bind(texture=self.adjust_entry_height)
+        self.bind(background_color=self.update_entry_color)
         super().__init__(**kwargs)
 
     def adjust_entry_height(self, instance, texture):
         if texture:
             self.height = texture.height
 
+    def update_entry_color(self, instance, color):
+        self.color = color_outline(color)
+        self.border_color = color_outline(color)
+
 
 class GWScrollingResultsLog(GWScrollView):
-
     default_name_color = ColorProperty(DEFAULT_NAME_COLOR)
     default_info_color = ColorProperty(DEFAULT_INFO_COLOR)
 
@@ -113,12 +116,10 @@ class GWScrollingResultsLog(GWScrollView):
     def log_result(self, message: str, entry_color=None):
         if not entry_color:
             entry_color = self.default_info_color
-        fg_color = color_outline(entry_color)
-        msg_label = GWResultsLogEntry(text=message, color=fg_color, background_color=entry_color)
+        msg_label = GWResultsLogEntry(text=message, color=color_outline(entry_color), background_color=entry_color)
         self.results_log_actual.add_widget(msg_label)
         LOG.debug(f"self.height = {self.height}")
         LOG.debug(f"self.results_log_actual.height = {self.results_log_actual.height}")
-        self.scroll_y = 0
 
     def update_section(self, section_name: str, section_info: Union[str, list], name_color=None, info_color=None):
         """

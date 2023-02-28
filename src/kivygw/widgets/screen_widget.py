@@ -9,7 +9,7 @@ from kivy.lang import Builder
 from ..utils.strings import snake_case
 from ..utils.class_utils import package_name
 
-LOG = logging.getLogger("kivygw")
+LOG = logging.getLogger("main")
 
 
 __all__ = [

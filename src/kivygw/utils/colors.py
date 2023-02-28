@@ -37,7 +37,9 @@ class NamedColor(Enum):
     as RGB tuples(0..256, 0..256,0..256), but also available
     as Kivy-style float (0.0 - 1.0) tuples.
 
-    NOTE: The Kivy ColorProperty understands the 140 standard HTML names directly.
+    NOTE: The Kivy ColorProperty understands the 140 standard HTML names
+    directly, but only in lower case. In a KV file, the color name must
+    be quoted (e.g. Background_color: 'aqua').
 
     NamedColor.AZURE.hex_format() == #F0FFFF
     NamedColor.AZURE.float_tuple() == (0.0,0.0,0.0,1.0)
@@ -824,7 +826,7 @@ def float_color(int_color):
     '''
     Converts an RGB value from integer (0-255) to float (0.0 to 1.0).
     '''
-    return int_color / 255 if int_color is not None else None
+    return min(int_color / 255, 1.0) if int_color is not None else None
 
 
 def float_tuple(int_tuple, alpha=None) -> Tuple:
@@ -923,7 +925,7 @@ def color_lighter(int_tuple) -> Tuple:
     :return: A 3-tuple that is halfway between the brightness of
     this color and that of full white.
     """
-    red, green, blue = int_tuple
+    red, green, blue = int_tuple[:3]
     red = int(red + (255 - red) / 2)
     green = int(green + (255 - green) / 2)
     blue = int(blue + (255 - blue) / 2)
@@ -937,7 +939,7 @@ def color_darker(int_tuple) -> Tuple:
 
     :return: A 3-tuple that is half as bright.
     """
-    red, green, blue = int_tuple
+    red, green, blue = int_tuple[:3]
     red = int(red / 2)
     green = int(green / 2)
     blue = int(blue / 2)
@@ -976,7 +978,7 @@ def color_outline(color_tuple) -> Tuple:
     if was_float := is_float_tuple(color_tuple):
         color_tuple = int_tuple(color_tuple)
     is_dark = color_brightness(color_tuple) < 128
-    result = (256, 256, 256) if is_dark else (0, 0, 0)
+    result = (255, 255, 255) if is_dark else (0, 0, 0)
     return float_tuple(result) if was_float else result
 
 
@@ -1009,8 +1011,8 @@ def color_distance(int_tuple1, int_tuple2) -> float:
 
     Credit: Inspired by reportlab.lib.colors.
     """
-    red1, green1, blue1 = int_tuple1
-    red2, green2, blue2 = int_tuple2
+    red1, green1, blue1 = int_tuple1[:3]
+    red2, green2, blue2 = int_tuple2[:3]
     if (red1 == red2) and (green1 == green2) and (blue1 == blue2):
         return 0.0  # avoid math rounding issues
     return math.sqrt((red1 - red2)**2 + (green1 - green2)**2 + (blue1 - blue2)**2)

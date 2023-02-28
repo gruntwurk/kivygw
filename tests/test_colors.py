@@ -1,5 +1,5 @@
-from kivygw import NamedColor, float_tuple
-from kivygw.utils.colors import int_tuple, is_float_tuple
+from kivygw import (NamedColor, float_tuple, int_tuple, is_float_tuple,
+                    color_brightness, color_darker, color_distance, color_outline, color_subdued)
 import pytest
 
 
@@ -92,3 +92,21 @@ def test_float_tuples():
     assert int_tuple((0.25, 0.5, 0.75, 0.999)) == (63, 127, 191, 254)
 
 
+def test_color_outline():
+    assert color_outline((0, 0, 0)) == (1, 1, 1)
+    assert color_outline((4, 0, 0)) == (255, 255, 255)
+    assert color_outline((0.1, 0, 0)) == (1, 1, 1)
+    assert color_outline((230, 0, 0)) == (255, 255, 255)
+    assert color_outline((230, 230, 0)) == (0, 0, 0)
+    assert is_float_tuple((0.7, 0.8, 0))
+    assert color_outline((0.7, 0.8, 0.2)) == (0, 0, 0)
+
+
+def test_color_subdued():
+    assert color_subdued((230, 230, 0)) == (115, 115, 0)
+    assert color_subdued((4, 0, 0)) == (129, 127, 127)
+    assert color_subdued((230, 0, 0)) == (242, 127, 127)
+
+    assert int_tuple(color_subdued((0.7, 0.8, 0.2))) == (89, 102, 25)
+    assert int_tuple(color_subdued((0.0, 0.0, 0.0))) == (127, 127, 127)
+    assert int_tuple(color_subdued((0.1, 0, 0))) == (140, 127, 127)
