@@ -765,9 +765,11 @@ class NamedColor(Enum):
 #                                                        Stand-Alone Functions
 # ############################################################################
 
-def color_parse(expr: any, names=None) -> Tuple:
+def color_parse(expr: any, names=None, default=None) -> Tuple:
     """
-    Parses the input/expression to create an RGB 3-tuple (or 4-tuple). The input can be:
+    Parses the input/expression to create an RGB 3-tuple (or 4-tuple).
+
+    :param expr: The input expression can be:
 
         * A key value of the optional names dictionary (e.g. a base16 scheme)
           -- in which case, the associated value is parsed instead.
@@ -776,11 +778,29 @@ def color_parse(expr: any, names=None) -> Tuple:
         * Hex format (#ff0088, #ff008840) -- the leading hash is optional. (Returns a 3- or 4-tuple.)
         * A string with an RGB tuple "(255,0,136)" -- the parens are optional. (Returns a 3- or 4-tuple.)
         * A tuple (any count) -- simply passed thru.
+
+    :param names: (Optional) A dictionary of named expressions to use instead
+        (e.g. a color scheme where a named purpose is mapped to a color).
+        Defaults to no substitions being considered.
+
+    :param default: (Optional) The value to return when the expr cannot be resolved.
+        Defaults to None.
+
+    :return: An integer 3-tuple.
     """
+    if not expr:
+        expr = default
+    if not expr:
+        return None
+
     if names is None:
         names = {}
-    if isinstance(expr, Tuple):
+
+    if isinstance(expr, tuple):
         return expr
+
+    if isinstance(expr, list):
+        return tuple(expr)
 
     if isinstance(expr, NamedColor):
         return expr.value
@@ -789,7 +809,7 @@ def color_parse(expr: any, names=None) -> Tuple:
         expr = names[expr]
 
     if not isinstance(expr, str):
-        return None
+        expr = default
 
     color = NamedColor.by_name(expr)
     if color:
@@ -804,7 +824,7 @@ def color_parse(expr: any, names=None) -> Tuple:
         if len(parts) >= 3:
             color = tuple(int(x) for x in parts)
 
-    return color
+    return color  # might still be None after all that
 
 
 def is_float_tuple(color_tuple) -> bool:
@@ -829,7 +849,7 @@ def float_color(int_color):
     return min(int_color / 255, 1.0) if int_color is not None else None
 
 
-def float_tuple(int_tuple, alpha=None) -> Tuple:
+def float_tuple(color_tuple, alpha=None) -> Tuple:
     '''
     Converts an RGB tuple from integers (0-255) to floats (0.0 to 1.0).
 
@@ -841,15 +861,17 @@ def float_tuple(int_tuple, alpha=None) -> Tuple:
 
     :return: A corresponding tuple of floats.
     '''
-    if not int_tuple:
+    if not color_tuple:
         return None
-    if len(int_tuple) == 3:
-        red, green, blue = int_tuple
+    if is_float_tuple(color_tuple):
+        return (*color_tuple[:3], alpha) if alpha else color_tuple
+    if len(color_tuple) == 3:
+        red, green, blue = color_tuple
         old_alpha = None
-    elif len(int_tuple) == 4:
-        red, green, blue, old_alpha = int_tuple
+    elif len(color_tuple) == 4:
+        red, green, blue, old_alpha = color_tuple
     else:
-        raise ValueError(f"float_tuple() requires a 3-tuple or a 4-tuple, but a {len(int_tuple)}-tuple was given.")
+        raise ValueError(f"float_tuple() requires a 3-tuple or a 4-tuple, but a {len(color_tuple)}-tuple was given.")
     if not alpha:
         alpha = float_color(old_alpha)
 

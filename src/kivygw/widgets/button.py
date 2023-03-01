@@ -35,7 +35,7 @@ class GWButton(CommandActionable, ButtonBehavior, GWLabel):
 
     # FYI, Inherited properties:
 
-    # BackgroundColor.background_color = ColorProperty()
+    # BackgroundColor.background_color
     # BackgroundColor.border_color
     # BackgroundColor.border_width
     # BackgroundColor.corner_radius
@@ -45,6 +45,5 @@ class GWButton(CommandActionable, ButtonBehavior, GWLabel):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-        self.background_color = 'gray'
-        self.color = 'black'
+        self.halign = 'center'
+        self.valign = 'middle'
