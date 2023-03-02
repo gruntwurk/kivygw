@@ -29,21 +29,21 @@ def test_NamedColor_methods():
     assert not NamedColor.TURQUOISEBLUE.is_standard()
 
     assert NamedColor.MINTCREAM.brightness() == 250
-    assert NamedColor.MINTCREAM.gray_version() == NamedColor.GRAY98
+    assert NamedColor.MINTCREAM.monochrome() == NamedColor.GRAY98
     assert NamedColor.MINTCREAM.lighter() == NamedColor.GRAY99
     assert NamedColor.MINTCREAM.darker() == NamedColor.GRAY49
     assert NamedColor.MINTCREAM.subdued() == NamedColor.GRAY49
     assert NamedColor.MINTCREAM.outline() == NamedColor.BLACK
 
     assert NamedColor.INDIANRED4.brightness() == 85
-    assert NamedColor.INDIANRED4.gray_version() == NamedColor.SGIDARKGRAY  # between GRAY33 and GRAY34, FYI
+    assert NamedColor.INDIANRED4.monochrome() == NamedColor.SGIDARKGRAY  # between GRAY33 and GRAY34, FYI
     assert NamedColor.INDIANRED4.lighter() == NamedColor.ROSYBROWN3
     assert NamedColor.INDIANRED4.darker() == NamedColor.SEPIA
     assert NamedColor.INDIANRED4.subdued() == NamedColor.ROSYBROWN3
     assert NamedColor.INDIANRED4.outline() == NamedColor.WHITE
 
     assert NamedColor.MIDNIGHTBLUE.brightness() == 54
-    assert NamedColor.MIDNIGHTBLUE.gray_version() == NamedColor.GRAY21
+    assert NamedColor.MIDNIGHTBLUE.monochrome() == NamedColor.GRAY21
     assert NamedColor.MIDNIGHTBLUE.lighter() == NamedColor.SGILIGHTBLUE
     assert NamedColor.MIDNIGHTBLUE.darker() == NamedColor.GRAY10
     assert NamedColor.MIDNIGHTBLUE.subdued() == NamedColor.SGILIGHTBLUE

@@ -26,16 +26,30 @@ class GWScrollView(ScrollView):
     """
     A ScrollView that defaults to vertical scrolling using a scroll bar (or the wheel).
 
-    NOTE: Make sure the contents of the scrollview have `size_hint_y: None`;
-    otherwise Kivy will compress the contents to fill the view, defeating the
-    point of scrolling.
+    NOTE: If the content widget (box layout, grid layout, etc.) is specified in code
+    (as opposed to in the KV file), then be sure to call `ensure_content_scrolls()`
+    after adding it.
     """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # A common mistake is to forget to set the scroll_type
         self.scroll_type = ['bars', 'content']
         self.do_scroll_x = False
-        self.bar_width = 6
+        self.do_scroll_y = True
+
+    def on_kv_post(self, base_widget):
+        super().on_kv_post(base_widget)
+        self.ensure_content_scrolls()
+
+    def ensure_content_scrolls(self):
+        """
+        Make sure that the contents of the scroll window (usually a box layout
+        or a grid layout) actually grows beyond the height of the scroll window
+        (as opposed to squeezing it all in).
+        """
+        for content_pane in self.children:
+            content_pane.size_hint_y = None
+            content_pane.bind(minimum_height=content_pane.setter('height'))
 
 
 class GWResultsLogPair(BoxLayout):
@@ -86,9 +100,9 @@ class GWScrollingResultsLog(GWScrollView):
         super().on_kv_post(base_widget)
 
     def initialize_actual_results_log_layout(self):
-        self.results_log_actual = BoxLayout(orientation='vertical', size_hint_y=None, padding=4, spacing=4)
-        self.results_log_actual.bind(minimum_height=self.results_log_actual.setter('height'))
+        self.results_log_actual = BoxLayout(orientation='vertical', padding=4, spacing=4)
         self.add_widget(self.results_log_actual)
+        self.ensure_content_scrolls()
 
     def log_result(self, info: Union[str, list], name=None, info_color=None, name_color=None):
         """

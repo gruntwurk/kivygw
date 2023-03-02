@@ -2,7 +2,7 @@ from enum import Enum, unique
 from typing import Tuple
 import re
 import math
-
+from colorsys import rgb_to_hsv
 
 __all__ = [
     'NamedColor',
@@ -23,6 +23,8 @@ __all__ = [
     'as_color',
     'as_named_color',
 ]
+
+HUE_GROUPS = 7
 
 
 # ############################################################################
@@ -658,10 +660,12 @@ class NamedColor(Enum):
         rgb = self.value
         return int(sum(rgb) / 3)
 
-    def gray_version(self) -> "NamedColor":
+    def monochrome(self, hue=0.0) -> "NamedColor":
         """
         Returns the corresponding grayscale NamedColor (determined by average
         brightness).
+
+        :param hue: FIXME
         """
         gray = self.brightness()
         return NamedColor.by_value(gray, gray, gray)
@@ -690,6 +694,10 @@ class NamedColor(Enum):
         is_dark = self.brightness() < 128
         return NamedColor.WHITE if is_dark else NamedColor.BLACK
 
+    def hsv(self) -> tuple:
+        """Returns a float tuple of the corresponding HSV values."""
+        return rgb_to_hsv(*self.float_tuple()[:3])
+
     def hex_format(self) -> str:
         '''Returns color in hex format'''
         return color_hex_format(self.value)
@@ -702,6 +710,33 @@ class NamedColor(Enum):
         :param alpha: The alpha value to use (between 0.0 and 1.0). Defaults to 1.0.
         '''
         return float_tuple(self.value, alpha=alpha)
+
+    @classmethod
+    def all_colors(cls, *args, only_standard=False, sort_by='hue') -> list:
+        def key_hue(color):
+            hue_group = int(color.hsv()[0] * HUE_GROUPS)
+            return hue_group, *color.hsv()[1:]
+
+        def key_brightness(color):
+            return color.brightness()
+
+        def key_name(color):
+            return color.name
+
+        if sort_by == 'hue':
+            key_fn = key_hue
+        elif sort_by == 'brightness':
+            key_fn = key_brightness
+        else:
+            key_fn = key_name
+
+        result = []
+        for e in cls:
+            result.append(e)
+            if only_standard and e == cls.BLACK:
+                break
+        result.sort(key=key_fn)
+        return result
 
     @classmethod
     def by_name(cls, name: str):
@@ -764,6 +799,7 @@ class NamedColor(Enum):
 # ############################################################################
 #                                                        Stand-Alone Functions
 # ############################################################################
+
 
 def color_parse(expr: any, names=None, default=None) -> Tuple:
     """

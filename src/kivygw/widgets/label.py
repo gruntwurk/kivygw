@@ -37,6 +37,7 @@ class GWLabel(BackgroundColor, Label):
         super().__init__(**kwargs)
         self.halign = 'left'
         self.valign = 'top'
+        self.markup = True
         self.bind(pos=self.recalc_text_size)
         self.bind(size=self.recalc_text_size)
         self.bind(texture=self.adjust_entry_height)
