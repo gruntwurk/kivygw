@@ -166,7 +166,6 @@ class CommandAction(Widget):
             return
         # No handler found, maybe we just haven't loaded the handler_name property directly yet
 
-
     def attach_to(self, associated_widget: Widget):
         if associated_widget in self.associated_widgets:
             return  # already attached
@@ -212,7 +211,8 @@ class CommandActionable(Widget):
         self.register_event_type('on_invoke')
         self._command_action = None
         super().__init__(**kwargs)
-        self.bind(text=self.calc_handler_name)
+        if hasattr(self, 'text'):
+            self.bind(text=self.calc_handler_name)
 
     @property
     def command_action(self) -> CommandAction:
@@ -221,7 +221,9 @@ class CommandActionable(Widget):
         If one doesn't currently exist, it will be automatically created.
         """
         if not hasattr(self, '_command_action') or not self._command_action:
-            cmd_action = CommandAction(text=self.text)
+            cmd_action = CommandAction()
+            if hasattr(self, 'text'):
+                cmd_action.text = self.text
             cmd_action.attach_to(self)
         return self._command_action
 

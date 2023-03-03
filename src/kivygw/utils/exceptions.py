@@ -15,6 +15,7 @@ UNCAUGHT_MESSAGE = "Uncaught error detected. There is no good reason why the fol
 EX_OK = 0
 EX_WARNING = 1
 EX_ERROR = 2
+EX_USAGE = 64  # The command was used incorrectly (bad arguments, bad flag, etc.)
 
 
 # ############################################################################
@@ -87,6 +88,25 @@ def log_uncaught(exception: Optional[Exception] = None, log: logging.Logger = No
 # ############################################################################
 #                                                            CUSTOM EXCEPTIONS
 # ############################################################################
+
+class GWValueError(ValueError):
+    """
+    Exception raised because of a bad value.
+
+    TIP: In your try/except code, it's suggested to catch `ValueError`, in
+    general, rather than `GWValueError`, specifically.
+
+    :param args: A payload for the exception, as usual (typically either a str
+    with an explanation of the error, or another instance of `Exception`).
+
+    :param loglevel: (optional) How this error should appear in the log (if no
+    outer code catches it and handles it, that is). The default is `logging.ERROR`.
+    """
+
+    def __init__(self, *args) -> None:
+        super().__init__(*args)
+        self.exitcode = EX_USAGE
+
 
 class ConfigError(Exception):
     """

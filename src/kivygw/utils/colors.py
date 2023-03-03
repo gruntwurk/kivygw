@@ -714,8 +714,7 @@ class NamedColor(Enum):
     @classmethod
     def all_colors(cls, *args, only_standard=False, sort_by='hue') -> list:
         def key_hue(color):
-            hue_group = int(color.hsv()[0] * HUE_GROUPS)
-            return hue_group, *color.hsv()[1:]
+            return color.hsv()
 
         def key_brightness(color):
             return color.brightness()
@@ -723,9 +722,9 @@ class NamedColor(Enum):
         def key_name(color):
             return color.name
 
-        if sort_by == 'hue':
+        if sort_by in ['hue', 'hsv']:
             key_fn = key_hue
-        elif sort_by == 'brightness':
+        elif sort_by in ['brightness', 'bright']:
             key_fn = key_brightness
         else:
             key_fn = key_name

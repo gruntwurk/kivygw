@@ -58,11 +58,11 @@ class EnumDropDown(Spinner):
 
     def on_kv_post(self, base_widget):
         self.enum_class: Enum = class_from_name(self.enum_class_name)
-        self.values = [e.value for e in self.enum_class]
+        self.values = [e.display_name() for e in self.enum_class]
         if self.values:
             self.configure_each_choice()
             if hasattr(self.enum_class, 'default_enum'):
-                self.text = self.enum_class.default_enum().value
+                self.text = self.enum_class.default_enum().display_name()
             else:
                 self.text = self.values[0]
         super().on_kv_post(base_widget)
@@ -79,12 +79,11 @@ class EnumDropDown(Spinner):
 
 
 def colorize_widget_per_enum(widget, enum_class):
-    if hasattr(enum_class, "by_value"):
-        enum = enum_class.by_value(widget.text)
-        if hasattr(enum, "color"):
-            widget.background_normal = ''
-            widget.background_color = float_tuple(enum.color())
-            widget.color = float_tuple(color_outline(enum.color()))
+    if widget.text and hasattr(enum_class, "by_value") and hasattr(enum_class, "color"):
+        e = enum_class.by_value(widget.text)
+        widget.background_normal = ''
+        widget.background_color = float_tuple(e.color())
+        widget.color = float_tuple(color_outline(e.color()))
 
 
 __ALL__ = [

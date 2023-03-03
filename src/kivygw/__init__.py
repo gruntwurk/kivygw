@@ -8,6 +8,7 @@ __version__ = "0.0.1"
 
 from .utils.cameras import *
 from .utils.colors import *
+from .utils.enums import *
 from .utils.exceptions import *
 from .utils.numeric import *
 from .utils.strings import *
