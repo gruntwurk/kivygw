@@ -26,7 +26,7 @@ class EnumDropDown(Spinner):
     A dropdown widget (aka. spinner) that auto-populates with all of the
     possible values of a given Enum class.
 
-    * If the Enum class has a (class) method called `default_enum()`, then
+    * If the Enum class has a (class) method called `default_member()`, then
       that method will determine the initial value for the spinner;
       otherwise, the first value in the list (as declared in the enum class)
       will be used.
@@ -61,8 +61,8 @@ class EnumDropDown(Spinner):
         self.values = [e.display_name() for e in self.enum_class]
         if self.values:
             self.configure_each_choice()
-            if hasattr(self.enum_class, 'default_enum'):
-                self.text = self.enum_class.default_enum().display_name()
+            if hasattr(self.enum_class, 'default_member'):
+                self.text = self.enum_class.default_member().display_name()
             else:
                 self.text = self.values[0]
         super().on_kv_post(base_widget)

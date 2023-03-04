@@ -1,5 +1,6 @@
 import contextlib
 from enum import Enum
+from typing import List
 
 from kivygw.utils.exceptions import GWValueError
 
@@ -16,7 +17,7 @@ class GWEnum(Enum):
     Element methods provided are: `display_name`
 
     Class methods provided are: `possible_values`, `by_name`, `by_value`,
-        `default_enum`
+        `default_member`
 
     TIP: Usually, an `@unique` decorator is appropriate for enums used with
         DropdownEnum.
@@ -24,30 +25,52 @@ class GWEnum(Enum):
 
     def display_name(self) -> str:
         """
-        Returns the value as a string -- or, if the value is a tuple, then
-        returns just the first element of the tuple as a string. This allows
-        for the value to contain additional information such as a corresponding
-        color.
-
-        :return: _description_
+        :return: The primary value, if it's a string; otherwise, the member name.
         """
-        return str(self.value[0]) if isinstance(self.value, tuple) else str(self.value)
+        primary = self.primary_value()
+
+        return primary if isinstance(primary, str) else self.name
+
+    def primary_value(self):
+        return self.value[0] if self.is_tuple() else self.value
+
+    def is_tuple(self):
+        return isinstance(self.value, tuple)
+
+    def secondary_values(self):
+        """
+        If the value is a tuple, then the first elemnent of the tuple is
+        considered to be the primary value while all other elements of the
+        tuple are considered to be secondary.
+
+        :return: `None`, `value[1]` (if value is a 2-tuple), or `value[1:]`
+        (if value is a 3-or-more-tuple).
+        """
+        if not self.is_tuple():
+            return None
+        return self.value[1] if len(self.value) == 2 else self.value[1:]
 
     @classmethod
-    def possible_values(cls):
+    def possible_values(cls) -> List[str]:
         """
-        Returns a list of the element values, in the order defined.
+        A list describing the elements, in the order defined. The primary
+        value is used if it is a string; otherise, the element's name is used.
         """
         return [e.display_name() for e in cls]
 
     @classmethod
     def by_value(cls, value):
         if not value:
-            return cls.default_enum()
+            return cls.default_member()
+        if isinstance(value, str):
+            value = value.strip().casefold()
         for e in cls:
-            if e.value == value or e.display_name().casefold() == value.strip().casefold():
+            operand = e.primary_value()
+            if isinstance(operand, str):
+                operand = operand.strip().casefold()
+            if operand == value:
                 return e
-        raise GWValueError(f"No such {cls.__name__} as {value}")
+        raise GWValueError(f"No such {cls.__name__} with a primary value of {value}")
 
     @classmethod
     def by_name(cls, name: str):
@@ -56,9 +79,6 @@ class GWEnum(Enum):
         to `TheEnum[name]`, but that raises an exception if not found, while this
         method return `None`. But first, it'll try again looking for the name in
         all lower-case.
-
-        :param name: _description_
-        :return: _description_
         """
         name = name.strip()
         with contextlib.suppress(KeyError):
@@ -68,9 +88,11 @@ class GWEnum(Enum):
         return None
 
     @classmethod
-    def default_enum(cls):
+    def default_member(cls):
         """
-        Returns the first element defined. Override this for anything else.
+        Returns the first member defined.
+
+        NOTE: Override this method for anything more complicated.
         """
         # We can't just index it as `cls[0]` because __getitem__ looks for the
         # member name, not the position.
