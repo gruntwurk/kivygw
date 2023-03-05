@@ -4,7 +4,7 @@ from kivy.uix.spinner import Spinner, SpinnerOption
 # from kivy.uix.dropdown import DropDown
 from kivy.properties import NumericProperty, StringProperty
 
-from ..utils.colors import float_tuple, color_outline
+from ..utils.colors import float_tuple, color_outline, is_color
 from ..utils.class_utils import class_from_name
 
 
@@ -26,14 +26,14 @@ class EnumDropDown(Spinner):
     A dropdown widget (aka. spinner) that auto-populates with all of the
     possible values of a given Enum class.
 
-    * If the Enum class has a (class) method called `default_member()`, then
+    * If the Enum class has a class method called `default_member()`, then
       that method will determine the initial value for the spinner;
       otherwise, the first value in the list (as declared in the enum class)
       will be used.
-    * If the Enum class has a (class) method called `by_value()`, then this
-      widget will know how to get back to the enum by the text that is
-      displayed.
-    * In that case, if the Enum class also has a (regular) method called
+    * If the Enum class has a class method called `by_value()`, then this
+      dropdown widget will know how to get back to the enum by the text that
+      is displayed.
+    * In that case, if the Enum class also has a method called
       `color()`, then that method will be called to set the background
       color of the choice (which is merely a Button). `color()` needs to
       return an RGB 3-tuple or an RGBA 4-tuple of ints (0-255).
@@ -45,7 +45,8 @@ class EnumDropDown(Spinner):
             id: _rank
             on_text: root.validate_member_rank()
 
-    :property enum_class_name: The class name of the enum that provides the possible values.
+    :property enum_class_name: The class name of the enum that provides the
+        possible values.
 
     :property height_per: How high (px) to make each choice. Default is 40.
     """
@@ -79,11 +80,25 @@ class EnumDropDown(Spinner):
 
 
 def colorize_widget_per_enum(widget, enum_class):
-    if widget.text and hasattr(enum_class, "by_value") and hasattr(enum_class, "color"):
+    """
+    Colorizes a particular dropdown choice widget (usually a Button) according to the
+
+    :param widget: _description_
+    :param enum_class: _description_
+    """
+    if widget.text and hasattr(enum_class, "by_value"):
         e = enum_class.by_value(widget.text)
         widget.background_normal = ''
-        widget.background_color = float_tuple(e.color())
-        widget.color = float_tuple(color_outline(e.color()))
+        # TODO move this into an abstract function(?)
+        if hasattr(enum_class, "color"):
+            int_color = e.color()
+        elif hasattr(enum_class, "secondary_values"):
+            int_color = e.secondary_values()
+        else:
+            return
+        if is_color(int_color):
+            widget.background_color = float_tuple(int_color)
+            widget.color = float_tuple(color_outline(int_color))
 
 
 __ALL__ = [

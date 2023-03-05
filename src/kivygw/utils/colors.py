@@ -14,6 +14,7 @@ __all__ = [
     'float_tuple',
     'int_color',
     'int_tuple',
+    'is_color',
     'is_float_tuple',
     'color_brightness',
     'color_subdued',
@@ -953,6 +954,33 @@ def color_parse(expr: any, names=None, default=None) -> Tuple:
             color = tuple(int(x) for x in parts)
 
     return color  # might still be None after all that
+
+
+def is_color(possible_color_tuple) -> bool:
+    """
+    Analyzes `possible_color_tuple` to see if the value could properly represent
+    a color. Namely it is a 3-tuple or a 4-tuple (or list), and all of those 3-4
+    elements are either ints (0-255) ir all floats (0.0 to 1.0).
+
+    :param possible_color_tuple: the candidate value.
+    :return: True if it looks like a color tuple.
+    """
+    if not (isinstance(possible_color_tuple, (tuple, list))):
+        return False
+    count = len(possible_color_tuple)
+    if count < 3 or count > 4:
+        return False
+    float_count = 0
+    above_1_count = 0
+
+    for v in possible_color_tuple:
+        if v < 0 or v > 255:
+            return False
+        if isinstance(v, float):
+            float_count += 1
+        if v > 1:
+            above_1_count += 1
+    return above_1_count == 0 or float_count == 0
 
 
 def is_float_tuple(color_tuple) -> bool:

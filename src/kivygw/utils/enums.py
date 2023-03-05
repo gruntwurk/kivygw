@@ -78,13 +78,15 @@ class GWEnum(Enum):
         Returns the element that matches the given `name`. You could simply refer
         to `TheEnum[name]`, but that raises an exception if not found, while this
         method return `None`. But first, it'll try again looking for the name in
-        all lower-case.
+        all lower-case, and again in all uppercase.
         """
         name = name.strip()
         with contextlib.suppress(KeyError):
             return cls[name]
         with contextlib.suppress(KeyError):
             return cls[name.casefold()]
+        with contextlib.suppress(KeyError):
+            return cls[name.upper()]
         return None
 
     @classmethod
