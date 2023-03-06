@@ -6,7 +6,31 @@ from kivygw.utils.exceptions import GWValueError
 
 __all__ = [
     "GWEnum",
+    'enum_by_name',
 ]
+
+
+def enum_by_name(enum_class, name: str):
+    """
+    Returns the element that matches the given `name`. You could simply refer
+    to `TheEnum[name]`, but that raises an exception if not found, while this
+    method returns `None`. But first, it'll try again looking for the name in
+    all lower-case (casefold), and again in all uppercase.
+
+    NOTE: This function is a copy of the one defined in `gwpycore`, since
+    `gwpycore` and `kivygw` don't know about each other, but it's needed in
+    both. Only the copy in `gwpycore` has unit tests.
+    """
+    if name is None:
+        return None
+    name = name.strip()
+    with contextlib.suppress(KeyError):
+        return enum_class[name]
+    with contextlib.suppress(KeyError):
+        return enum_class[name.casefold()]
+    with contextlib.suppress(KeyError):
+        return enum_class[name.upper()]
+    return None
 
 
 class GWEnum(Enum):
@@ -121,14 +145,7 @@ class GWEnum(Enum):
         method return `None`. But first, it'll try again looking for the name in
         all lower-case (casefold), and again in all uppercase.
         """
-        name = name.strip()
-        with contextlib.suppress(KeyError):
-            return cls[name]
-        with contextlib.suppress(KeyError):
-            return cls[name.casefold()]
-        with contextlib.suppress(KeyError):
-            return cls[name.upper()]
-        return None
+        return enum_by_name(cls, name)
 
     @classmethod
     def default(cls):
