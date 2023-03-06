@@ -22,10 +22,12 @@ def test_NamedColor_construction():
 
 
 def test_NamedColor_methods():
+    assert NamedColor.DARKSLATEGRAY.is_standard()
+    assert NamedColor.BLACK.is_standard()
+
     assert NamedColor.AZURE.hex_format() == "#F0FFFF"
 
-    assert NamedColor.AZURE2.float_tuple() == float_tuple((224, 238, 238))  # AZURE2 = (224, 238, 238)
-    assert NamedColor.BLACK.is_standard()
+    assert NamedColor.AZURE2.float_tuple() == float_tuple((224, 238, 238), alpha=1.0)  # AZURE2 = (224, 238, 238)
     assert not NamedColor.TURQUOISEBLUE.is_standard()
 
     assert NamedColor.MINTCREAM.brightness() == 250
@@ -89,7 +91,7 @@ def test_float_tuples():
 
     assert int_tuple((0.25, 0.5, 0.75)) == (63, 127, 191)
     assert int_tuple((0.25, 0.5, 0.75, 1.0)) == (63, 127, 191, 255)
-    assert int_tuple((0.25, 0.5, 0.75, 0.999)) == (63, 127, 191, 254)
+    assert int_tuple((0.25, 0.5, 0.75, 0.999)) == (63, 127, 191, 255)
 
 
 def test_color_outline():

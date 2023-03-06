@@ -655,7 +655,7 @@ class NamedColor(GWEnum):
         """
         Whether or not this color is one of the 140 standard HTML colors.
         """
-        self.value[1]
+        return self.value[1]
 
     def brightness(self) -> int:
         """

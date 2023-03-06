@@ -12,43 +12,85 @@ __all__ = [
 class GWEnum(Enum):
     """
     Base class for an `Enum` that, among other things, provides all the
-    neccesary suuport for being used with the `DropdownEnum` Kivy widget.
+    neccesary suuport for being used with the `GWDropdownEnum` Kivy widget.
+    Enum values that are tuples have special treatment.
 
-    Element methods provided are: `display_name`
-
-    Class methods provided are: `possible_values`, `by_name`, `by_value`,
-        `default_member`
-
-    TIP: Usually, an `@unique` decorator is appropriate for enums used with
-        DropdownEnum.
+    Added methods:
+        * `display_name()` (and its alias `description()`) -> str
+        * `value_count` -> int
+        * `primary_value`
+        * `secondary_values` (plural) -> tuple
+        * `secondary_value` (singlular)
+        * (class) `possible_values` -> list(str)
+        * (class) `by_name` -> (enum member)
+        * (class) `by_value`, -> (enum member)
+        * (class) `default` -> (enum member)
     """
 
     def display_name(self) -> str:
         """
+        How to describe this member to the user (e.g. as a choice in a dropdown
+        (spinner) widget.
+
         :return: The primary value, if it's a string; otherwise, the member name.
         """
         primary = self.primary_value()
-
         return primary if isinstance(primary, str) else self.name
 
+    def description(self) -> str:
+        """
+        Alias for display_name().
+        """
+        return self.display_name()
+
+    def value_count(self) -> int:
+        """
+        If the value is a tuple, then the value count is the length of the
+        tuple; otherwise 1.
+
+        NOTE: Override this method to always return 1 if the value is a tuple
+        but should be treated as a single value (e.g. an RGB color).
+        """
+        # IMPORTANT: We are specifically testing for `tuple` type on purpose
+        # (as opposed to `iterable`) becasue `iterable` includes `str`.
+        # And also because Enum values are immutable, so expressing the value
+        # as a `list` (as opposed to  a `tuple`) makes no sense.
+        # TODO Test if a list value gets converted to a tuple.
+        return len(self.value) if isinstance(self.value, tuple) else 1
+
     def primary_value(self):
-        return self.value[0] if self.is_tuple() else self.value
-
-    def is_tuple(self):
-        return isinstance(self.value, tuple)
-
-    def secondary_values(self):
         """
         If the value is a tuple, then the first elemnent of the tuple is
         considered to be the primary value while all other elements of the
         tuple are considered to be secondary.
 
-        :return: `None`, `value[1]` (if value is a 2-tuple), or `value[1:]`
-        (if value is a 3-or-more-tuple).
+        :return: `value`, or `value[0]` (if value is a tuple).
         """
-        if not self.is_tuple():
-            return None
-        return self.value[1] if len(self.value) == 2 else self.value[1:]
+        return self.value if self.value_count() == 1 else self.value[0]
+
+    def secondary_values(self) -> tuple:
+        """
+        The value tuple without the first element (if the value is a tuple).
+
+        If the value is a tuple, then the first elemnent of the tuple is
+        considered to be the primary value while all other elements of the
+        tuple are considered to be secondary.
+
+        :return: `None`, or `value[1:]` (if value is a tuple).
+        """
+        return None if self.value_count() == 1 else self.value[1:]
+
+    def secondary_value(self):
+        """
+        The one next value after the primary value, if any.
+
+        If the value is a tuple, then the first elemnent of the tuple is
+        considered to be the primary value while all other elements of the
+        tuple are considered to be secondary.
+
+        :return: `None` or `value[1]` (if value is a tuple).
+        """
+        return None if self.value_count() == 1 else self.value[1]
 
     @classmethod
     def possible_values(cls) -> List[str]:
@@ -61,14 +103,13 @@ class GWEnum(Enum):
     @classmethod
     def by_value(cls, value):
         if not value:
-            return cls.default_member()
+            return cls.default()
         if isinstance(value, str):
             value = value.strip().casefold()
         for e in cls:
-            operand = e.primary_value()
-            if isinstance(operand, str):
-                operand = operand.strip().casefold()
-            if operand == value:
+            if str(e.primary_value()).casefold() == value:
+                return e
+            if e.name.casefold() == value:
                 return e
         raise GWValueError(f"No such {cls.__name__} with a primary value of {value}")
 
@@ -78,7 +119,7 @@ class GWEnum(Enum):
         Returns the element that matches the given `name`. You could simply refer
         to `TheEnum[name]`, but that raises an exception if not found, while this
         method return `None`. But first, it'll try again looking for the name in
-        all lower-case, and again in all uppercase.
+        all lower-case (casefold), and again in all uppercase.
         """
         name = name.strip()
         with contextlib.suppress(KeyError):
@@ -90,7 +131,7 @@ class GWEnum(Enum):
         return None
 
     @classmethod
-    def default_member(cls):
+    def default(cls):
         """
         Returns the first member defined.
 
@@ -100,4 +141,3 @@ class GWEnum(Enum):
         # member name, not the position.
         for e in cls:
             return e
-
