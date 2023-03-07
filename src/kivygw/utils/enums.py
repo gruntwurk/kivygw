@@ -131,9 +131,7 @@ class GWEnum(Enum):
         if isinstance(value, str):
             value = value.strip().casefold()
         for e in cls:
-            if str(e.primary_value()).casefold() == value:
-                return e
-            if e.name.casefold() == value:
+            if value in [e.primary_value(), str(e.primary_value()).casefold(), e.name.casefold()]:
                 return e
         raise GWValueError(f"No such {cls.__name__} with a primary value of {value}")
 
