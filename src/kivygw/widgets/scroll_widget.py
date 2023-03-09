@@ -3,7 +3,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ColorProperty
 
-from kivygw.utils.colors import color_outline, color_parse, float_tuple
+from kivygw.utils.colors import color_outline
 
 from .label import GWLabel
 
@@ -126,8 +126,10 @@ class GWScrollingResultsLog(GWScrollView):
         if isinstance(info, list):
             info = '\n'.join(info)
 
-        info_color = float_tuple(color_parse(info_color, default=self.default_info_color), alpha=1.0)
-        name_color = float_tuple(color_parse(name_color, default=self.default_name_color), alpha=1.0)
+        if not info_color:
+            info_color = self.default_info_color
+        if not name_color:
+            name_color = self.default_name_color
 
         if not name:
             self.results_log_actual.add_widget(GWResultsLogSingle(text=info, background_color=info_color))
