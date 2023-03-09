@@ -1,5 +1,6 @@
 from kivygw import snake_case
 
+
 def test_snake_case():
     assert snake_case("SomeThing") == "some_thing"
     assert snake_case("someThing") == "some_thing"

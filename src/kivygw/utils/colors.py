@@ -9,8 +9,7 @@ __all__ = [
     'color_outline',
 ]
 
-    
-    
+
 def is_color(possible_color_tuple) -> bool:
     """
     Analyzes `possible_color_tuple` to see if the value could properly represent
