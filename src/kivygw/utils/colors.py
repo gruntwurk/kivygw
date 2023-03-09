@@ -8,7 +8,6 @@ from kivygw.utils.enums import GWEnum
 
 __all__ = [
     'NamedColor',
-    'NamedHue',
     'color_parse',
     'float_color',
     'float_tuple',
@@ -35,6 +34,23 @@ GRAYSCALE = 0
 PRIMARY = 1
 SECONDARY = 2
 TERTIARY = 3
+
+# Named positions on the color wheel in degrees
+HUE_NAMES = {
+    -1: 'grayscale',
+    0: 'red',
+    30: 'redorange',
+    60: 'orange',
+    90: 'yelloworange',
+    120: 'yellow',
+    150: 'yellowgreen',
+    180: 'green',
+    210: 'bluegreen',
+    240: 'blue',
+    270: 'blueviolet',
+    300: 'violet',
+    330: 'redviolet',
+}
 
 
 # ############################################################################
@@ -660,9 +676,11 @@ class NamedColor(GWEnum):
     def brightness(self) -> int:
         """
         Returns the average of the RGB values.
+
+        NOTE: This is different than the V brightness in HSV. V is computed as
+        the highest of R, G, B, not the average,
         """
-        rgb = self.value[0]
-        return int(sum(rgb) / 3)
+        return color_brightness(self.value[0])
 
     def monochrome(self, hue=0.0) -> "NamedColor":
         """
@@ -718,6 +736,9 @@ class NamedColor(GWEnum):
         """
         return rgb_to_hsv(*self.float_tuple()[:3])
 
+    def hue_group(self) -> int:
+        return hue_group(self.hsv()[0])
+
     def is_gray(self):
         """
         Whether or not the color is white/gray/black (i.e. the saturation is zero).
@@ -752,10 +773,8 @@ class NamedColor(GWEnum):
         '''
         return float_tuple(self.value[0], alpha=alpha)
 
-    def named_hue(self) -> "NamedHue":
-        if self.is_gray():
-            return NamedHue.GRAYSCALE
-        return NamedHue.by_float(self.hsv()[0])
+    def hue_name(self) -> str:
+        return HUE_NAMES[-1 if self.is_gray() else hue_group(self.hsv()[0]) ]
 
     @classmethod
     def all_colors(cls, *args, only_standard=False, sort_by='named_hue') -> list:
@@ -837,93 +856,54 @@ class NamedColor(GWEnum):
         return best_match_so_far
 
 
-# ############################################################################
-#                                                              NamedHue (enum)
-# ############################################################################
-
-class NamedHue(GWEnum):
-    """
-    An enumeration of the 12 basic hues (plus grayscale) along the color
-    spectrum (around the color wheel) from red through violet. The primary
-    value is the position on the wheel in degrees (0 for RED, 330 for
-    REDVIOLET). That is, below 0 would be infrared and above 360 would be
-    ultraviolet.
-
-    GRAYSCALE is a special case for when the color's satuartion is 0.
-
-    :param GWEnum: _description_
-    """
-    RED = (0, PRIMARY)
-    REDORANGE = (30, TERTIARY)
-    ORANGE = (60, SECONDARY)
-    YELLOWORANGE = (90, TERTIARY)
-    YELLOW = (120, PRIMARY)
-    YELLOWGREEN = (150, TERTIARY)
-    GREEN = (180, SECONDARY)
-    BLUEGREEN = (210, TERTIARY)
-    BLUE = (240, PRIMARY)
-    BLUEVIOLET = (270, TERTIARY)
-    VIOLET = (300, SECONDARY)
-    REDVIOLET = (330, TERTIARY)
-    GRAYSCALE = (0, GRAYSCALE)
-
-    def classification(self) -> bool:
-        """
-        Whether this hue is a primary color (1), secondary (2), tertiary (3),
-        or GRAYSCALE (0).
-        """
-        self.value[1]
-
-    def as_float(self):
-        """The position on the color wheel as a float (0.0 - 0.999)."""
-        return float(self.value[0]/360)
-
-    @classmethod
-    def by_float(cls, hue):
-        """
-        Returns the nearest NamedHue for the given hue in the range of 0.0
-        to 1.0.
-        """
-        degrees = round(hue * 12.0) * 30
-        if degrees > 330:
-            degrees = 0
-        return cls.by_value(degrees)
 
 
 # ############################################################################
 #                                                        Stand-Alone Functions
 # ############################################################################
 
-def color_parse(expr: any, names=None, default=None) -> Tuple:
+def color_parse(expr: any, colormap2=None, default=None) -> Tuple:
     """
-    Parses the input/expression to create an RGB 3-tuple (or 4-tuple).
+    Parses the input/expression to create an RGB or an RGBA int tuple.
 
-    :param expr: The input expression can be:
+    :param expr: Any of these:
+        * A named color (any case) from the `NamedColor` enum. This includes the140 HTML/X11 color names,
+          the 7 gray/grey alternate spellings, and 400+ additional color names commonly used.
+        * A named color (any case) that is defined (as lower case) in the
+          optional `colormap2` dictionary -- in which case, the associated value
+          is parsed instead.
+        * Hex format `str` (#ff0088, #ff008840) -- the leading hash is optional. 
+          (Returns a 3- or 4-tuple.)
+        * A `str` with an RGB tuple "(255,0,136)" or an RGBA tuple
+          "(255,0,136,48)" -- the parens are optional. 
+          (Returns a 3- or 4-tuple.)
+        * A tuple (any count) -- simply passed thru (without any checks on
+          whether the tuple actually represents an RGB or RGBA color).
 
-        * A key value of the optional names dictionary (e.g. a base16 scheme)
-          -- in which case, the associated value is parsed instead.
-        * One of the NamedColor names. (Returns a 3-tuple.)
-        * A NamedColor element. (Returns a 3-tuple.)
-        * Hex format (#ff0088, #ff008840) -- the leading hash is optional. (Returns a 3- or 4-tuple.)
-        * A string with an RGB tuple "(255,0,136)" -- the parens are optional. (Returns a 3- or 4-tuple.)
-        * A tuple (any count) -- simply passed thru.
-
-    :param names: (Optional) A dictionary of named expressions to use instead
-        (e.g. a color scheme where a named purpose is mapped to a color).
-        Defaults to no substitions being considered.
+    :param colormap2: (Optional) A secondary dictionary of color names (the NamedColor enum being the primary map).
+        expressions (e.g. the colors of
+        a syntax highlight scheme by purpose). The associated value can be
+        expressed in any form accepted by `expr` (but use a tuple of ints for
+        efficiency). Defaults to an empty map. NOTE: The keys must be lower case.
 
     :param default: (Optional) The value to return when the expr cannot be resolved.
         Defaults to None.
 
-    :return: An integer 3-tuple.
+    :return: A 3- or 4-tuple of ints (0-255), depending on the `expr`.
+          
+    See also: `PIL.ImageColor.colormap` (the 147 HTML/X11 colors).
+    See also: `PIL.ImageColor.getrgb()` and `PIL.ImageColor.getcolor()`.
+    See also: `ReportLib` also has a set of color processing utilities.
+    See also: `colorsys` (python build-in library) for converting between
+    color system (e.g. RGB -> HSV).
     """
     if not expr:
         expr = default
     if not expr:
         return None
 
-    if names is None:
-        names = {}
+    if colormap2 is None:
+        colormap2 = {}
 
     if isinstance(expr, tuple):
         return expr
@@ -934,11 +914,13 @@ def color_parse(expr: any, names=None, default=None) -> Tuple:
     if isinstance(expr, NamedColor):
         return expr.value[0]
 
-    if isinstance(expr, str) and expr in names:
-        expr = names[expr]
+    if isinstance(expr, str):
+        expr = expr.strip().casefold()
+        if colormap2 and expr in colormap2:
+            expr = colormap2[expr]
 
-    if not isinstance(expr, str):
-        expr = default
+    if isinstance(expr, str):
+        expr = expr.strip().casefold()
 
     color = NamedColor.by_name(expr)
     if color:
@@ -996,6 +978,16 @@ def is_float_tuple(color_tuple) -> bool:
     :return: True if it is Kivy style.
     """
     return not any(value > 1.0 or value < 0.0 for value in color_tuple)
+
+
+def float_hue(hue):
+    '''
+    Converts a hue from an integer (-1 - 255) to a float (0.0 to 1.0).
+    Or, if it is already a float, just passes it on.
+    '''
+    if isinstance(hue, float) and hue < 1.0:
+        return hue
+    return max(0.0, min(hue / 360, 1.0))
 
 
 def float_color(int_color):
@@ -1079,21 +1071,21 @@ def color_brightness(int_tuple) -> int:
 
     :return: The average of the RGB values.
     """
-    red, green, blue = int_tuple[:3]
-    return int((red + green + blue) / 3)
+    return int((sum(int_tuple[:3])) / 3)
 
 
-def color_monochrome(int_tuple, hue=0.0) -> Tuple:
+def color_monochrome(int_tuple, hue=-1) -> Tuple:
     """
     :param int_tuple: Either a 3- or 4-tuple of integers (0-255).
     (The alpha channel is ignored.)
 
-    :return: A 3-tuple of ints for the corresponding grayscale color
+    :return: A 3-tuple of RGB ints for the corresponding monochrome color
     (determined by average brightness).
     """
     # FIXME hue
-    gray = color_brightness(int_tuple)
-    return (gray, gray, gray)
+    h, s, v = rgb_to_hsv(float_tuple(int_tuple))
+
+    return hsv_to_rgb(float_hue(hue), s, v)
 
 
 def color_lighter(int_tuple) -> Tuple:
@@ -1261,3 +1253,20 @@ def as_named_color(input: any) -> NamedColor:
     type of value is returned. Both accept the same variety of inputs.
     """
     return NamedColor.by_value(color_parse(input))
+
+
+def hue_group(hue) -> int:
+    """
+    Rounds off the given hue to one of 12 groups.
+
+    :param hue: The hue to convert, either expressed as int degrees
+        (0-360) or a float (0.0 - 0.9999)
+
+    :return: The hue group in int degrees: 30, 60, 90, ... 330
+    """
+    if isinstance(hue, float) and hue < 1.0:
+        hue = round(hue * 12.0) * 30
+    hue = int(hue)
+    if hue > 330:
+        hue = 0
+    return hue

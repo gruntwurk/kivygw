@@ -3,7 +3,6 @@ import logging
 from kivy.uix.label import Label
 from kivy.properties import NumericProperty, ReferenceListProperty
 from .background import BackgroundColor
-from ..utils.colors import NamedColor
 
 LOG = logging.getLogger("main")
 
@@ -67,6 +66,6 @@ class GWStatusBar(Label):
         super().__init__(**kwargs)
         self.size_hint_y = None
         self.height = 30
-        self.background_color = NamedColor.LIGHTGRAY.float_tuple()
+        self.background_color = 'lightgray'
 
 
