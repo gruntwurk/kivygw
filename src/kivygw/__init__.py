@@ -8,7 +8,6 @@ __version__ = "0.0.1"
 
 from .utils.cameras import *
 from .utils.colors import *
-from .utils.enums import *
 from .utils.exceptions import *
 from .utils.numeric import *
 from .utils.strings import *
@@ -25,6 +24,7 @@ from .widgets.dropdown import *
 from .widgets.crop_tool import *
 from .widgets.screen_widget import *
 from .widgets.scroll_widget import *
+from .widgets.layout import *
 from .widgets.label import *
 from .widgets.button import *
 from .widgets.hotkey import *
