@@ -1,0 +1,101 @@
+= GruntWurk's Kivy Library for Python
+
+:imagesdir: doc/_static
+
+image::gwpycore-logo.png[alt="GruntWurk logo",height="64",width="64",align="right"]
+
+This is *GruntWurk's Extended Capabilities Library for the Kivy GUI framework*
+
+[width="100%",cols="2,5"]
+|===
+| Project site        | https://github.com/gruntwurk/kivygw[]
+| Issues              | https://github.com/gruntwurk/kivygw/issues/[]
+| Authors             | Craig Jones (polyglot-jones)
+| License             | link:/LICENSE.txt[BSD 3-clause]
+| Python versions     | 3.6 or above                               |
+|===
+
+
+
+== The GruntWurk Family of Libraries/Projects
+
+* `gwpycore` -- Classes and functions that augment fundamental features of Python.
+* `kivygw` -- Extensions/helpers for the Kivy GUI framework. *_<- You Are Here_*
+* `reportlabgw` -- Extensions/helpers for the ReportLab PDF framework.
+* `general-tools` -- BASH script tools/libraries for building Linux boxes (e.g. *RaspberryPi* boxes; virtual machines via *Vagrant*), a reference library of *cheat sheets*, and more.
+* `vscode-python` -- a *Visual Studio Code plugin* with 100's of commands and snippets for working with plain Python as well as these "GruntWurk for Python" enhancements.
+* `sublime_gruntwurk_python` -- a *SublimeText 4* plugin with commands and snippets for working with plain Python as well as these "GruntWurk for Python" enhancements.
+
+NOTE: Despite "`core`" being in the name, `gwpycore` is not a dependency of the other libraries, although they can certainly all work together.
+
+
+
+== The GruntWurk Mission
+
+The GruntWurk mission is to support open-source Python projects by making it easy for potential new contributors to jump on board.
+As the name implies, we aim to take the grunt-work out of project development, hiding away the complexities so that contributors can immediately get down to business.
+The shorter the learning curve, the easier it is for contributors to join in.
+See link:/doc/GRUNTWORK.adoc[further details].
+
+
+
+== Features
+
+This `kivygw` package extends the Kivy GUI framework as follows:
+
+
+=== Colors
+
+* A *NamedColor* enum with 500+ standard colors.
+(Works seamlessly with `GWConfigParser` in the `gwpycore` library.)
+* Numerous, easy-to-use functions to manipulate colors -- available both as stand-alone function and as `NamedColor` methods.
+
+=== Dialog Boxes
+
+* A standard set of dialog boxes (inform_user, ask_user_yes_no, choose_file, choose_folder, ...)
+
+=== Basic Widgets
+
+* *BackgroundColor* widget -- A composable widget that sets the background of another widget.
+* *EnumDropDown* widget -- A subclass of Kivy's Spinner widget that is automatically populated by an enum class.
+* *GWLabel* widget -- Combines Kivy's Label widget with BackgroundColor.
+* *GWButton* widget -- Combines Kivy's Button widget with BackgroundColor.
+
+=== Image Processing Widget
+
+* *CameraInventory*() singleton -- Inventories all available cameras.
+* *GWCamera* widget -- A subclass of Kivy's Camera widget that is automatically configured by our CameraInventory() singleton.
+* *CropTool* widget -- A widget for zooming/panning/cropping an image.
+
+
+
+== Be Aware
+
+NOTE: This library was developed in Python 3.8 on Windows 10.
+Everything should work in Python 3.6 and/or on non-Windows boxes, but no guarantees either way.
+
+
+
+== Documentation
+
+* link:/doc/GRUNTWORK.adoc[The Gruntwork Mission] -- details.
+* link:/doc/CODE_OF_CONDUCT.adoc[Contributor code of conduct] -- common sense, but spelled out anyway.
+
+For the User (App Developer):
+
+* link:/doc/INSTALL.adoc[Installation]
+
+
+For any Possible Contributor to this Library, see the `doc_technical` folder of the `gwpycore` library.:
+
+* link:../gwpycore/doc_technical/CONTRIBUTING.adoc[Contributing]
+* link:../gwpycore/doc_technical/DEVELOPMENT_SETUP.adoc[Development Environment Setup]
+* link:../gwpycore/doc_technical/VIRTUAL_ENVIRONMENTS.adoc[Using Python Virtual Environments]
+* link:../gwpycore/doc_technical/DESIGN_NOTES.adoc[Design Notes]
+
+
+
+'''
+
+Next Topic: link:/doc/GRUNTWORK.adoc[The Gruntwork Mission] -- details.
+
