@@ -158,13 +158,26 @@ class InformDialog(GWDialog):
 def inform_user(msg, on_ok: Callable = None, ok="OK", title="Information"):
     """
     Pops up a modal dialog to inform the user of something.
-    :param msg: The text of the information.
+
+    :param msg: The text of the information: a `str`, a `List[str]`, an
+        Exception with a `msg` attribute, or anything else with a `__str__`
+        method.
+
     :param on_ok: A callable (that accepts at least one parameter) which will
         be called when the user clicks `OK` to close the dialog. It will always
-        be passed True (to be consistent with `ask_user_yes_no`).
+        be passed `True` (to be consistent with `ask_user_yes_no`).
+
     :param ok: The wording on the OK button (default: "OK")
+
     :param title: The title of the dialog box (default: "Information")
     """
+    if isinstance(msg, list):
+        msg = "\n ".join(list)
+    elif isinstance(msg, Exception) and hasattr(msg, 'msg'):
+        msg = msg.msg
+    else:
+        msg = str(msg)
+
     dlg = InformDialog()
     dlg.set_user_callbacks(on_ok)
     dlg.buttons = {"ok": ok}
