@@ -24,7 +24,7 @@ class CameraInventory():
     @property
     def active_camera_port(self):
         if self._active_camera_port is None and len(self._inventory) > 0:
-            self._active_camera_port.keys()[0]
+            self._active_camera_port = list(self._inventory.keys())[0]
         return self._active_camera_port
 
     @active_camera_port.setter
