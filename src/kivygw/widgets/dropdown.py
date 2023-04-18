@@ -4,9 +4,14 @@ from kivy.uix.spinner import Spinner, SpinnerOption
 # from kivy.uix.dropdown import DropDown
 from kivy.properties import NumericProperty, StringProperty
 
+from kivygw.utils.enums import enum_by_value
+
 from ..utils.colors import float_tuple, color_outline, is_color
 from ..utils.class_utils import class_from_name
 
+__ALL__ = [
+    'EnumDropDown'
+]
 
 LOG = logging.getLogger("kivygw")
 DEFAULT_DROPDOWN_SELECTION_HEIGHT = 40
@@ -81,26 +86,29 @@ class EnumDropDown(Spinner):
 
 def colorize_widget_per_enum(widget, enum_class):
     """
-    Colorizes a particular dropdown choice widget (usually a Button) according to the
+    Colorizes a particular dropdown choice widget (usually a Button) according
+    to the definition of the enum. Specifically, if the enum has a color()
+    method, that will be used. Alternatively, if the enum has a secondary_values()
+    method, and if secondary_values() returns a tuple that appears to describe
+    a color, then that is used. Otherwise, nothing changes.
 
-    :param widget: _description_
-    :param enum_class: _description_
+    :param widget: The dropdown choice widget (e.g a button that is the child
+        of a spinner).
+
+    :param enum_class: The ennum class that is associated with the dropdown
+        (i.e. how the text of the widget was determined).
     """
-    if widget.text and hasattr(enum_class, "by_value"):
-        e = enum_class.by_value(widget.text)
-        widget.background_normal = ''
-        # TODO move this into an abstract function(?)
-        if hasattr(enum_class, "color"):
-            int_color = e.color()
-        elif hasattr(enum_class, "secondary_values"):
-            int_color = e.secondary_values()
-        else:
-            return
-        if is_color(int_color):
-            widget.background_color = float_tuple(int_color)
-            widget.color = float_tuple(color_outline(int_color))
+    if not (e := enum_by_value(enum_class, widget.text)):
+        return
 
-
-__ALL__ = [
-    'EnumDropDown'
-]
+    widget.background_normal = ''
+    # TODO move this into an abstract function(?)
+    if hasattr(enum_class, "color"):
+        int_color = e.color()
+    elif hasattr(enum_class, "secondary_values"):
+        int_color = e.secondary_values()
+    else:
+        return
+    if is_color(int_color):
+        widget.background_color = float_tuple(int_color)
+        widget.color = float_tuple(color_outline(int_color))

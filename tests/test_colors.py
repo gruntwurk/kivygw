@@ -1,7 +1,4 @@
-from kivygw import (
-    float_tuple, int_tuple, is_float_tuple,
-    color_outline
-    )
+from kivygw import float_tuple, int_tuple, is_float_tuple, color_outline
 import pytest
 
 
