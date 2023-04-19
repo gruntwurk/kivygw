@@ -4,7 +4,7 @@ from kivy.properties import StringProperty, ListProperty, BooleanProperty, Color
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.label import Label
-from kivy.uix.behaviors import ButtonBehavior
+from kivy.uix.behaviors import ButtonBehavior, FocusBehavior
 from kivygw.widgets.background import BackgroundColor
 
 from kivygw.widgets.label import GWLabel
@@ -61,7 +61,7 @@ class GWCheckBox(CommandActionable, BackgroundColor, BoxLayout):
         self._label.color = self.color
 
 
-class GWButton(CommandActionable, ButtonBehavior, GWLabel):
+class GWButton(CommandActionable, ButtonBehavior, FocusBehavior, GWLabel):
     """
     An alternative to the kivy Button widget that also inherits from
     `CommandActionable` and `BackgroundColor` (via `GWLabel`).

@@ -28,6 +28,7 @@ from .widgets.screen_widget import *
 from .widgets.scroll_widget import *
 from .widgets.layout import *
 from .widgets.label import *
+from .widgets.text_input import *
 from .widgets.button import *
 from .widgets.hotkey import *
 from .widgets.action import *
