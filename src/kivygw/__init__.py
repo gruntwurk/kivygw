@@ -19,6 +19,7 @@ from .app_support.dialogs import *
 from .app_support.screens import *
 from .app_support.main_window_config import *
 from .app_support.inactivity import *
+from .app_support.confirm_exit import *
 from .widgets.background import *
 from .widgets.camera import *
 from .widgets.dropdown import *
