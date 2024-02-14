@@ -10,7 +10,7 @@ def snake_case(identifier: str) -> str:
     """
     Converts CamelCase or javaCase to snake_case (all lower with underscores).
     """
-    words = re.findall(r"([a-z]+|[A-Z][a-z]*|[^A-Za-z]+)", identifier)
+    words = re.findall(r"([a-z0-9]+|[A-Z][a-z0-9]*|[^A-Za-z0-9]+)", identifier)
     lower_words = [word.lower() for word in words if word != "_"]
     return "_".join(lower_words)
 
